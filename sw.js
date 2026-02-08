@@ -1,4 +1,5 @@
-const CACHE_NAME = "joue-ma-vie-v1";
+const CACHE_VERSION = "v1"
+const CACHE_NAME = `joue-ma-vie-${CACHE_VERSION}`;
 const FILES_TO_CACHE = [
   "./",
   "./index.html",

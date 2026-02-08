@@ -903,4 +903,15 @@ if ("serviceWorker" in navigator) {
     window.location.reload();
   });
 }
+async function forceUpdate() {
+  if ("serviceWorker" in navigator) {
+    const reg = await navigator.serviceWorker.getRegistration();
+    await reg?.update();
+  }
+  if ("caches" in window) {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  }
+  location.reload();
+}
 
