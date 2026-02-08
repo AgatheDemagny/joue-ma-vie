@@ -9,32 +9,6 @@
   <meta name="theme-color" content="#FF85C1" />
 </head>
 <body>
-  <div id="updateToast" class="hidden" style="
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  background: #FF85C1;
-  color: #fff;
-  padding: 12px 14px;
-  border-radius: 14px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  z-index: 9999;
-">
-  <span>✨ Nouvelle version disponible</span>
-  <button id="updateBtn" type="button" style="
-    background:#fff;
-    color:#FF85C1;
-    border:none;
-    border-radius: 10px;
-    padding: 8px 10px;
-    font-weight: 700;
-  ">Mettre à jour</button>
-</div>
-
   <div class="game">
 
     <!-- ONBOARDING : pseudo -->
@@ -236,7 +210,6 @@
         <h3>Mondes</h3>
         <div id="manageWorldsList"></div>
       </div>
-      <button id="forceUpdateBtn" class="ghost">🔄 Forcer mise à jour (fichiers)</button>
       <div class="card danger">
         <h3>Réinitialiser</h3>
         <p class="hint">Supprime toutes les données (pseudo, mondes, XP…).</p>

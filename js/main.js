@@ -855,44 +855,8 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// ================== PWA UPDATE TOAST (ROBUSTE ANDROID) ==================
-let swReg = null;
-
-function showUpdateToast() {
-  const toast = document.getElementById("updateToast");
-  const btn = document.getElementById("updateBtn");
-  if (!toast || !btn) return;
-
-  toast.classList.remove("hidden");
-
-btn.onclick = async () => {
-  const toast = document.getElementById("updateToast");
-  toast?.classList.add("hidden");
-
-  const reg = await navigator.serviceWorker.getRegistration();
-  if (!reg) return window.location.reload();
-
-  // 1) force une vérif d'update
-  try { await reg.update(); } catch(e) {}
-
-  // 2) si une version est en attente, on la force
-  if (reg.waiting) {
-    reg.waiting.postMessage({ type: "SKIP_WAITING" });
-  }
-
-  // 3) quoi qu'il arrive, on recharge (Chrome)
-  setTimeout(() => window.location.reload(), 300);
-};
-
-}
-
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    // une nouvelle version vient de prendre le contrôle → on recharge automatiquement
     window.location.reload();
   });
 }
-
-
-const forceUpdateBtn = document.getElementById("forceUpdateBtn");
-forceUpdateBtn?.addEventListener("click", () => forceUpdate());
