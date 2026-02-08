@@ -1,7 +1,7 @@
 {
   "name": "Joue ma Vie",
   "short_name": "Joue ma Vie",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#FFEAF4",
   "theme_color": "#FF85C1",
@@ -17,5 +17,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "scope": "./"
 }
