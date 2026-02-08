@@ -865,22 +865,25 @@ function showUpdateToast() {
 
   toast.classList.remove("hidden");
 
-  btn.onclick = async () => {
-    // masque tout de suite
-    toast.classList.add("hidden");
+btn.onclick = async () => {
+  const toast = document.getElementById("updateToast");
+  toast?.classList.add("hidden");
 
-    // force un check update
-    try { await swReg?.update(); } catch(e) {}
+  const reg = await navigator.serviceWorker.getRegistration();
+  if (!reg) return window.location.reload();
 
-    // si un SW est en attente, on le force à s'activer
-    if (swReg?.waiting) {
-      swReg.waiting.postMessage({ type: "SKIP_WAITING" });
-    }
+  // 1) force une vérif d'update
+  try { await reg.update(); } catch(e) {}
 
-    // ANDROID: reload obligatoire pour que la nouvelle version prenne le contrôle
-    // (même si controllerchange tarde ou ne vient pas)
-    setTimeout(() => window.location.reload(), 300);
-  };
+  // 2) si une version est en attente, on la force
+  if (reg.waiting) {
+    reg.waiting.postMessage({ type: "SKIP_WAITING" });
+  }
+
+  // 3) quoi qu'il arrive, on recharge (Chrome)
+  setTimeout(() => window.location.reload(), 300);
+};
+
 }
 
 if ("serviceWorker" in navigator) {
@@ -917,3 +920,6 @@ if ("serviceWorker" in navigator) {
     window.location.reload();
   });
 }
+
+const forceUpdateBtn = document.getElementById("forceUpdateBtn");
+forceUpdateBtn?.addEventListener("click", () => forceUpdate());

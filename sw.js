@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v3"
+const CACHE_VERSION = "v4"
 const CACHE_NAME = `joue-ma-vie-${CACHE_VERSION}`;
 const FILES_TO_CACHE = [
   "./",
