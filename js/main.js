@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("appVersion").textContent = "V1 - 08/02/2026";
+  document.getElementById("appVersion").textContent = "V2 - 08/02/2026";
 });
 
 // ================== Storage helpers ==================
@@ -865,15 +865,20 @@ function showUpdateToast() {
 
   toast.classList.remove("hidden");
 
-btn.onclick = async () => {
-  const reg = await navigator.serviceWorker.getRegistration();
-  if (!reg || !reg.waiting) return;
+  btn.onclick = () => {
+    // ✅ On utilise l'instance "waiting" capturée (la bonne)
+    if (!waitingSW) return;
 
-  // Cache le toast tout de suite (UX)
-  toast.classList.add("hidden");
+    // UX : masquer tout de suite
+    toast.classList.add("hidden");
 
-  // Demande l'activation de la nouvelle version
-  reg.waiting.postMessage({ type: "SKIP_WAITING" });
+    // Demande au SW d'activer la nouvelle version
+    waitingSW.postMessage({ type: "SKIP_WAITING" });
+
+    // fallback : si iOS ne déclenche pas controllerchange, on reload quand même
+    setTimeout(() => {
+      window.location.reload();
+    }, 1200);
   };
 }
 
@@ -881,45 +886,31 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistration().then((reg) => {
     if (!reg) return;
 
-    // Si un SW est déjà en attente au chargement
+    // si déjà une update en attente
     if (reg.waiting) {
       waitingSW = reg.waiting;
       showUpdateToast();
     }
 
-    // Détecter une nouvelle version
     reg.addEventListener("updatefound", () => {
       const newSW = reg.installing;
       if (!newSW) return;
 
       newSW.addEventListener("statechange", () => {
-        // installed + un controller => il y a une nouvelle version prête
         if (newSW.state === "installed" && navigator.serviceWorker.controller) {
-          waitingSW = reg.waiting || newSW;
-          showUpdateToast();
+          // ✅ IMPORTANT : reg.waiting est LA référence stable une fois installée
+          waitingSW = reg.waiting;
+          if (waitingSW) showUpdateToast();
         }
       });
     });
 
-    // Optionnel : check update à chaque ouverture (pratique en dev)
+    // check update à chaque ouverture (ok en dev)
     reg.update();
   });
 
-  // Quand le nouveau SW prend le contrôle, on recharge
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     document.getElementById("updateToast")?.classList.add("hidden");
     window.location.reload();
   });
 }
-async function forceUpdate() {
-  if ("serviceWorker" in navigator) {
-    const reg = await navigator.serviceWorker.getRegistration();
-    await reg?.update();
-  }
-  if ("caches" in window) {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => caches.delete(k)));
-  }
-  location.reload();
-}
-
