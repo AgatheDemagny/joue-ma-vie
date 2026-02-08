@@ -1,4 +1,6 @@
-document.getElementById("appVersion")?.textContent = "V1 - 08/02/2026";
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("appVersion").textContent = "V1 - 08/02/2026";
+});
 
 // ================== Storage helpers ==================
 const STORAGE_KEY = "joueMaVie";
