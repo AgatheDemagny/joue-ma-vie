@@ -181,6 +181,25 @@ const popupEl = el("popup");
 // quick world settings (future)
 const worldQuickSettingsBtn = el("worldQuickSettingsBtn");
 
+function forceCloseAddWorldModal() {
+  const modal = document.getElementById("addWorldModal");
+  if (!modal) return;
+
+  // Cache de manière sûre, même si le CSS/class bug
+  modal.classList.add("hidden");
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+}
+
+function forceOpenAddWorldModal() {
+  const modal = document.getElementById("addWorldModal");
+  if (!modal) return;
+
+  modal.classList.remove("hidden");
+  modal.style.display = "flex"; // ou "block" selon ton CSS
+  modal.setAttribute("aria-hidden", "false");
+}
+
 // ================== UI helpers ==================
 function showScreen(which) {
   [onboardingScreen, homeScreen, worldScreen, settingsScreen].forEach(s => s.classList.add("hidden"));
@@ -466,8 +485,12 @@ function goHome() {
 }
 
 // ================== Modals ==================
-openAddWorldBtn.onclick = () => addWorldModal.classList.remove("hidden");
-cancelWorldBtn.onclick = closeAddWorldModal;
+openAddWorldBtn.onclick = forceOpenAddWorldModal;
+cancelWorldBtn.onclick = (e) => {
+  e.preventDefault();
+  forceCloseAddWorldModal();
+};
+
 
 function closeAddWorldModal() {
   addWorldModal.classList.add("hidden");
@@ -501,8 +524,8 @@ createWorldBtn.onclick = () => {
   };
 
   save();
-  closeAddWorldModal();
   renderWorlds();
+  ForceCloseAddWorldModal();
 };
 
 // onboarding
@@ -818,3 +841,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+document.addEventListener("click", (e) => {
+  const modal = document.getElementById("addWorldModal");
+  if (!modal) return;
+
+  // si clic sur le fond du modal (overlay), fermer
+  if (e.target === modal) {
+    forceCloseAddWorldModal();
+  }
+});
+
