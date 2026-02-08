@@ -292,14 +292,6 @@ function renderOnboardingOrHome() {
 }
 
 function renderHome() {
-  // tabs init
-  const homeTabs = homeScreen.querySelectorAll(".tab-btn");
-  homeTabs.forEach(btn => {
-    btn.onclick = () => setActiveTab(homeScreen, btn.dataset.tab);
-  });
-  // default tab: stats
-  setActiveTab(homeScreen, "homeStats");
-
   renderHomeStats();
   renderWorlds();
 }

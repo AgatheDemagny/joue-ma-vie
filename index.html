@@ -28,13 +28,8 @@
         <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
       </header>
 
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="homeStats">📊 Stats</button>
-        <button class="tab-btn" data-tab="homeWorlds">🌍 Mondes</button>
-      </div>
-
       <!-- Onglet stats -->
-      <div id="homeStats" class="tab-panel">
+      <div id="homeStats">
         <div class="card">
           <p><strong>Joueuse :</strong> <span id="playerName"></span></p>
           <p><strong>Niveau :</strong> <span id="globalLevel"></span></p>
@@ -60,7 +55,7 @@
       </div>
 
       <!-- Onglet mondes -->
-      <div id="homeWorlds" class="tab-panel hidden">
+      <div id="homeWorlds">
         <div id="worldsList" class="worlds-grid"></div>
         <button id="openAddWorldBtn">➕ Ajouter un monde</button>
 
