@@ -41,7 +41,29 @@
 
     <h3>Mondes</h3>
     <div class="worlds-grid" id="worldsList"></div>
+    <button id="openAddWorldBtn">➕ Ajouter un monde</button>
   </div>
+
+  <div id="addWorldModal" class="card hidden">
+  <h3>Créer un monde</h3>
+
+  <label>Nom du monde</label>
+  <input id="worldNameInput" placeholder="Ex : Sport" />
+
+  <label>Icône (emoji)</label>
+  <input id="worldIconInput" placeholder="Ex : 🏃" />
+
+  <label>Règle XP</label>
+  <div style="display:flex; gap:6px;">
+    <input id="minutesBaseInput" type="number" placeholder="Minutes" />
+    <span style="align-self:center;">=</span>
+    <input id="xpBaseInput" type="number" placeholder="XP" />
+  </div>
+
+  <button id="createWorldBtn">Créer le monde</button>
+  <button id="cancelWorldBtn">Annuler</button>
+</div>
+
 
   <!-- Page monde -->
   <div id="worldScreen" class="hidden">
