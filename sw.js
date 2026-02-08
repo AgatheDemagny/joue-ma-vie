@@ -1,4 +1,4 @@
-const CACHE_NAME = "joue-ma-vie-v2"; // ⬅️ incrémente quand tu veux forcer une MAJ
+const CACHE_NAME = "joue-ma-vie-v3";
 const FILES_TO_CACHE = [
   "/",
   "/index.html",
@@ -9,33 +9,33 @@ const FILES_TO_CACHE = [
   "/manifest.json"
 ];
 
-// Installation : mise en cache + activation immédiate
 self.addEventListener("install", event => {
-  self.skipWaiting(); // ⬅️ prend la main tout de suite
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
   );
 });
 
-// Activation : nettoyage des anciens caches
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
       )
     )
   );
-  self.clients.claim(); // ⬅️ contrôle les pages ouvertes
+  self.clients.claim();
 });
 
-// Fetch : cache d'abord, réseau sinon
+// 🔔 écoute les messages depuis l'app
+self.addEventListener("message", event => {
+  if (event.data === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", event => {
   event.respondWith(
-    caches.match(event.request).then(
-      response => response || fetch(event.request)
-    )
+    caches.match(event.request).then(res => res || fetch(event.request))
   );
 });

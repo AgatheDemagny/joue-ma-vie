@@ -187,3 +187,42 @@ function setupAddQuestButton(){
 // ----------------- INITIALISATION -----------------
 setupAddQuestButton();
 renderHome();
+
+let newWorker;
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(reg => {
+
+    // nouvelle version détectée
+    reg.addEventListener("updatefound", () => {
+      newWorker = reg.installing;
+
+      newWorker.addEventListener("statechange", () => {
+        if (
+          newWorker.state === "installed" &&
+          navigator.serviceWorker.controller
+        ) {
+          showUpdateToast();
+        }
+      });
+    });
+  });
+}
+
+function showUpdateToast() {
+  const toast = document.getElementById("updateToast");
+  const btn = document.getElementById("updateBtn");
+
+  toast.classList.remove("hidden");
+
+  btn.onclick = () => {
+    if (newWorker) {
+      newWorker.postMessage("SKIP_WAITING");
+    }
+  };
+}
+
+// recharge automatique après activation
+navigator.serviceWorker.addEventListener("controllerchange", () => {
+  window.location.reload();
+});
