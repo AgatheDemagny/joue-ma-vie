@@ -1,3 +1,5 @@
+localStorage.removeItem("joueMaVie");
+
 // ================== DATA ==================
 let data = JSON.parse(localStorage.getItem("joueMaVie")) || {
   worlds: {}
@@ -91,3 +93,4 @@ createWorldBtn.onclick = () => {
 
 // ================== INIT ==================
 renderWorlds();
+
