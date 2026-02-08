@@ -8,6 +8,32 @@
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#FF85C1" />
 </head>
+<div id="updateToast" class="hidden" style="
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: #FF85C1;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  z-index: 9999;
+">
+  <span>✨ Nouvelle version disponible</span>
+  <button id="updateBtn" type="button" style="
+    background:#fff;
+    color:#FF85C1;
+    border:none;
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-weight: 700;
+  ">Mettre à jour</button>
+</div>
+
 <body>
   <div class="game">
 
@@ -229,5 +255,8 @@
       navigator.serviceWorker.register('./sw.js');
     }
   </script>
+  <div style="opacity:0.6;font-size:12px;text-align:center;margin-top:10px;">
+  Version: <span id="appVersion"></span>
+  </div>
 </body>
 </html>

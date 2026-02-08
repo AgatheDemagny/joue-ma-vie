@@ -1,3 +1,4 @@
+document.getElementById("appVersion")?.textContent = "V1 - 08/02/2026";
 
 // ================== Storage helpers ==================
 const STORAGE_KEY = "joueMaVie";
@@ -851,4 +852,55 @@ document.addEventListener("click", (e) => {
     forceCloseAddWorldModal();
   }
 });
+
+// ================== PWA UPDATE TOAST ==================
+let waitingSW = null;
+
+function showUpdateToast() {
+  const toast = document.getElementById("updateToast");
+  const btn = document.getElementById("updateBtn");
+  if (!toast || !btn) return;
+
+  toast.classList.remove("hidden");
+
+  btn.onclick = () => {
+    if (waitingSW) {
+      waitingSW.postMessage({ type: "SKIP_WAITING" });
+    }
+  };
+}
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistration().then((reg) => {
+    if (!reg) return;
+
+    // Si un SW est déjà en attente au chargement
+    if (reg.waiting) {
+      waitingSW = reg.waiting;
+      showUpdateToast();
+    }
+
+    // Détecter une nouvelle version
+    reg.addEventListener("updatefound", () => {
+      const newSW = reg.installing;
+      if (!newSW) return;
+
+      newSW.addEventListener("statechange", () => {
+        // installed + un controller => il y a une nouvelle version prête
+        if (newSW.state === "installed" && navigator.serviceWorker.controller) {
+          waitingSW = reg.waiting || newSW;
+          showUpdateToast();
+        }
+      });
+    });
+
+    // Optionnel : check update à chaque ouverture (pratique en dev)
+    reg.update();
+  });
+
+  // Quand le nouveau SW prend le contrôle, on recharge
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    window.location.reload();
+  });
+}
 
