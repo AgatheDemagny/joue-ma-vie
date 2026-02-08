@@ -864,7 +864,7 @@ function showUpdateToast() {
   toast.classList.remove("hidden");
 
   btn.onclick = () => {
-  if (!waitingSW) return;
+  if (!waitingSW) return alert("waitingSW introuvable");
 
   // Envoie les deux formats pour être sûr à 100%
   waitingSW.postMessage("SKIP_WAITING");
