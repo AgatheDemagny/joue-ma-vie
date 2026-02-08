@@ -447,18 +447,53 @@ function renderObjectives() {
       canValidate = !obj.done;
       if (obj.done) label.style.textDecoration = "line-through";
     } else if (obj.type === "milestone") {
-      const step = (obj.steps || []).find(s => !s.done);
-      if (!step) {
-        title = `${obj.prefix} (terminé) ${obj.suffix}`;
+      const steps = obj.steps || [];
+
+      // Dernier palier validé (le plus grand "done")
+      const doneSteps = steps.filter(s => s.done);
+      const lastDone = doneSteps.length ? doneSteps[doneSteps.length - 1] : null;
+
+      // Prochain palier à faire (premier non done)
+      const next = steps.find(s => !s.done) || null;
+
+      // On va afficher 1 ou 2 lignes : dernier validé + prochain
+      // On crée le rendu "à la main" en dessous (au lieu d'une seule ligne)
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.flexDirection = "column";
+      container.style.gap = "6px";
+
+      if (lastDone) {
+        const lineDone = document.createElement("div");
+        lineDone.style.opacity = "0.75";
+        lineDone.style.textDecoration = "line-through";
+        lineDone.innerText = `${obj.prefix} ${lastDone.count} ${obj.suffix} ✅`;
+        container.appendChild(lineDone);
+      }
+
+      if (next) {
+        const lineNext = document.createElement("div");
+        lineNext.innerText = `${obj.prefix} ${next.count} ${obj.suffix}`;
+        container.appendChild(lineNext);
+
+        title = ""; // on ne met pas de title sur la ligne principale
+        xp = next.xp;
+        canValidate = true;
+
+        // On remplace le label par notre container
+        label.innerText = "";
+        label.appendChild(container);
+
+        badge.innerText = "📈";
+      } else {
+        // tout est terminé
+        label.innerText = `${obj.prefix} (terminé) ${obj.suffix}`;
         badge.innerText = "✅";
         canValidate = false;
         label.style.textDecoration = "line-through";
-      } else {
-        title = `${obj.prefix} ${step.count} ${obj.suffix}`;
-        badge.innerText = "📈";
-        xp = step.xp;
       }
     }
+
 
     label.innerText = title;
 
@@ -601,6 +636,11 @@ addMilestoneStepBtn.onclick = () => {
   const xp = parseInt(milestoneXpInput.value, 10);
   if (!Number.isFinite(count) || count <= 0) return alert("Palier invalide");
   if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
+  // Empêche d'ajouter un palier <= au dernier palier (ordre obligatoire)
+  const last = draftMilestoneSteps[draftMilestoneSteps.length - 1];
+  if (last && count <= last.count) {
+    return alert(`Ajoute des paliers dans l’ordre (ex : ${last.count + 1}, puis plus grand).`);
+  }
 
   draftMilestoneSteps.push({ count, xp, done: false });
 
