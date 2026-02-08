@@ -35,6 +35,7 @@ function renderWorlds() {
     const btn = document.createElement("button");
     btn.className = "world-btn";
     btn.innerText = `${world.icon} ${world.name}`;
+    btn.onclick = () => openWorld(world.id);
     worldsListEl.appendChild(btn);
   });
 }
@@ -112,3 +113,48 @@ if (resetBtn) {
   };
 }
 
+// ================== NAVIGATION MONDE ==================
+const homeScreen = document.getElementById("homeScreen");
+const worldScreen = document.getElementById("worldScreen");
+const backHomeBtn = document.getElementById("backHomeBtn");
+
+const worldTitle = document.getElementById("worldTitle");
+const worldRule = document.getElementById("worldRule");
+const worldTime = document.getElementById("worldTime");
+const worldXp = document.getElementById("worldXp");
+
+function openWorld(worldId) {
+  const world = data.worlds[worldId];
+  if (!world) return alert("Monde introuvable");
+
+  data.activeWorld = worldId;
+  save();
+
+  // bascule écrans
+  homeScreen.classList.add("hidden");
+  worldScreen.classList.remove("hidden");
+
+  renderWorldScreen();
+}
+
+function goHome() {
+  worldScreen.classList.add("hidden");
+  homeScreen.classList.remove("hidden");
+  renderWorlds();
+}
+
+if (backHomeBtn) {
+  backHomeBtn.onclick = () => goHome();
+}
+
+function renderWorldScreen() {
+  const worldId = data.activeWorld;
+  const world = data.worlds[worldId];
+  if (!world) return;
+
+  worldTitle.innerText = `${world.icon} ${world.name}`;
+  worldRule.innerText = `${world.rules.minutesBase} min = ${world.rules.xpBase} XP`;
+
+  worldTime.innerText = world.stats?.time ?? 0;
+  worldXp.innerText = world.stats?.xp ?? 0;
+}

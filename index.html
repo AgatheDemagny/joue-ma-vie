@@ -19,12 +19,27 @@
       <div class="worlds-grid" id="worldsList"></div>
 
       <button id="openAddWorldBtn">➕ Ajouter un monde</button>
-      
+
       <button id="resetAppBtn" style="margin-top:10px; background:#ffb3b3;">
   🔥 Reset l’app
-</button>
-
+      </button>
     </div>
+
+    <!-- Page monde -->
+<div id="worldScreen" class="hidden">
+  <button id="backHomeBtn">← Retour</button>
+
+  <h2 id="worldTitle"></h2>
+
+  <div class="card">
+    <p><strong>Règle XP :</strong> <span id="worldRule"></span></p>
+  </div>
+
+  <div class="card">
+    <p><strong>Temps total :</strong> <span id="worldTime">0</span> min</p>
+    <p><strong>XP du monde :</strong> <span id="worldXp">0</span> XP</p>
+  </div>
+</div>
 
     <!-- Modal / formulaire : ajouter un monde -->
     <div id="addWorldModal" class="card hidden" style="margin-top: 12px;">
