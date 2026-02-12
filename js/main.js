@@ -49,6 +49,11 @@ function defaultData() {
       monthKey: getMonthKey()
     },
 
+    history: {
+      weeks: {},  // { "2026-W06": { xp, goal } }
+      months: {}  // { "2026-02": { xp, goal } }
+    },
+
     global: {
       totalXp: 0,
       weekXp: 0,
@@ -75,16 +80,32 @@ function load() {
   if (data.settings.weekGoals == null) data.settings.weekGoals = defaultData().settings.weekGoals;
   if (!data.meta) data.meta = { updatedAt: Date.now() };
   if (!data.meta.updatedAt) data.meta.updatedAt = Date.now();
+  if (!data.history) data.history = { weeks: {}, months: {} };
+  if (!data.history.weeks) data.history.weeks = {};
+  if (!data.history.months) data.history.months = {};
 
   // reset week/month if keys changed
   const wk = getISOWeekKey();
   const mk = getMonthKey();
   if (data.periods.weekKey !== wk) {
+    const oldKey = data.periods.weekKey;
+    const oldXp = data.global.weekXp ?? 0;
+    const oldGoal = (data.settings?.weekGoals?.[data.settings?.weekLoad] ?? 250);
+    if (oldKey) {
+      data.history.weeks[oldKey] = { xp: oldXp, goal: oldGoal };
+    }
     data.periods.weekKey = wk;
     data.global.weekXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.weekXp = 0; });
   }
+
   if (data.periods.monthKey !== mk) {
+    const oldKey = data.periods.monthKey;
+    const oldXp = data.global.monthXp ?? 0;
+    const oldGoal = Number(data.settings?.monthGoal) || 1000;
+    if (oldKey) {
+      data.history.months[oldKey] = { xp: oldXp, goal: oldGoal };
+    }
     data.periods.monthKey = mk;
     data.global.monthXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.monthXp = 0; });
@@ -115,11 +136,13 @@ const settingsScreen = el("settingsScreen");
 // onboarding
 const playerNameInput = el("playerNameInput");
 const startBtn = el("startBtn");
+const openPerformanceBtn = el("openPerformanceBtn");
 
 // home stats
 const playerNameEl = el("playerName");
 const globalLevelEl = el("globalLevel");
 const globalXpEl = el("globalXp");
+const globalTimeHoursEl = el("globalTimeHours");
 
 const weekLoadPicker = el("weekLoadPicker");
 const weekXpEl = el("weekXp");
@@ -178,6 +201,12 @@ const createMilestoneObjectiveBtn = el("createMilestoneObjectiveBtn");
 
 const createObjectiveBtn = el("createObjectiveBtn");
 
+// perf page
+const performanceScreen = el("performanceScreen");
+const backFromPerformanceBtn = el("backFromPerformanceBtn");
+const perfWeekList = el("perfWeekList");
+const perfMonthList = el("perfMonthList");
+
 // settings
 const openSettingsBtn = el("openSettingsBtn");
 const backFromSettingsBtn = el("backFromSettingsBtn");
@@ -218,7 +247,8 @@ function forceOpenAddWorldModal() {
 
 // ================== UI helpers ==================
 function showScreen(which) {
-  [onboardingScreen, homeScreen, worldScreen, settingsScreen].forEach(s => s.classList.add("hidden"));
+  [onboardingScreen, homeScreen, worldScreen, settingsScreen, performanceScreen]
+    .forEach(s => s.classList.add("hidden"));
   which.classList.remove("hidden");
 }
 
@@ -240,6 +270,12 @@ function showPopup(text) {
 }
 
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
+function getGlobalTotalMinutes() {
+  return Object.values(state.worlds || {})
+    .filter(w => w && w.active !== false)
+    .reduce((sum, w) => sum + (w?.stats?.timeTotal || 0), 0);
+}
 
 // ================== Levels (progressive curve) ==================
 function xpForNextLevel(level, base, growth) {
@@ -331,17 +367,85 @@ function renderHome() {
   renderWorlds();
 }
 
+function renderPerformanceScreen() {
+  // tabs
+  const perfTabs = performanceScreen.querySelectorAll(".tab-btn");
+  perfTabs.forEach(btn => {
+    btn.onclick = () => setActiveTab(performanceScreen, btn.dataset.tab);
+  });
+  setActiveTab(performanceScreen, "perfWeek");
+
+  renderPerformanceLists();
+}
+
+function renderPerformanceLists() {
+  // WEEK
+  const weekItems = { ...(state.history?.weeks || {}) };
+  const currentWeekKey = state.periods.weekKey;
+  weekItems[currentWeekKey] = { xp: state.global.weekXp ?? 0, goal: getWeekGoal() };
+
+  const weekKeys = Object.keys(weekItems).sort().reverse();
+  perfWeekList.innerHTML = weekKeys.length ? "" : `<p class="hint">Aucune donnée.</p>`;
+
+  weekKeys.forEach(k => {
+    const { xp, goal } = weekItems[k] || { xp: 0, goal: 1 };
+    const pct = clamp01((xp || 0) / Math.max(1, goal || 1));
+    perfWeekList.innerHTML += `
+      <div class="card subtle" style="margin:10px 0;">
+        <div style="display:flex;justify-content:space-between;gap:8px;">
+          <strong>${k}</strong>
+          <span class="hint">${xp} / ${goal} XP</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(pct*100)}%">${Math.round(pct*100)}%</div></div>
+      </div>
+    `;
+  });
+
+  // MONTH
+  const monthItems = { ...(state.history?.months || {}) };
+  const currentMonthKey = state.periods.monthKey;
+  monthItems[currentMonthKey] = { xp: state.global.monthXp ?? 0, goal: getMonthGoal() };
+
+  const monthKeys = Object.keys(monthItems).sort().reverse();
+  perfMonthList.innerHTML = monthKeys.length ? "" : `<p class="hint">Aucune donnée.</p>`;
+
+  monthKeys.forEach(k => {
+    const { xp, goal } = monthItems[k] || { xp: 0, goal: 1 };
+    const pct = clamp01((xp || 0) / Math.max(1, goal || 1));
+    perfMonthList.innerHTML += `
+      <div class="card subtle" style="margin:10px 0;">
+        <div style="display:flex;justify-content:space-between;gap:8px;">
+          <strong>${k}</strong>
+          <span class="hint">${xp} / ${goal} XP</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(pct*100)}%">${Math.round(pct*100)}%</div></div>
+      </div>
+    `;
+  });
+}
+
 function renderHomeStats() {
   playerNameEl.innerText = state.playerName || "";
   globalXpEl.innerText = state.global.totalXp ?? 0;
   globalLevelEl.innerText = levelFromXp(state.global.totalXp ?? 0, state.settings.levelBase, state.settings.levelGrowth);
+  const totalHours = getGlobalTotalMinutes() / 60;
+  globalTimeHoursEl.innerText = (Math.round(totalHours * 10) / 10).toString(); // 1 décimale
 
   // week load buttons
   const buttons = weekLoadPicker.querySelectorAll("button");
   buttons.forEach(b => {
     b.classList.toggle("active", b.dataset.load === state.settings.weekLoad);
     b.onclick = () => {
-      state.settings.weekLoad = b.dataset.load;
+      const nextLoad = b.dataset.load;
+      const current = state.settings.weekLoad;
+
+      if (nextLoad === current) return;
+
+      const label = nextLoad === "busy" ? "chargée" : nextLoad === "normal" ? "normale" : "légère";
+      const ok = confirm(`Confirmer semaine ${label} ?`);
+      if (!ok) return;
+
+      state.settings.weekLoad = nextLoad;
       save();
       renderHomeStats();
     };
@@ -368,7 +472,7 @@ function renderWorlds() {
   const activeWorlds = Object.values(state.worlds).filter(w => w && w.active !== false);
 
   if (activeWorlds.length === 0) {
-    worldsListEl.innerHTML = `<div class="card"><p>Aucun monde créé pour l’instant.</p></div>`;
+    worldsListEl.innerHTML = `<p class="hint">Aucun monde créé pour l’instant.</p>`;
     return;
   }
 
@@ -451,13 +555,17 @@ function renderObjectives() {
 
     if (obj.type === "repeatable") {
       const done = obj.doneCount || 0;
-      title = `${obj.name}`;
+      const gained = done * (obj.xp || 0);
+      title = `${obj.name} (${obj.xp} / ${gained} XP)`;
       badge.innerText = `🔁 x${done}`;
       xp = obj.xp;
+
     } else if (obj.type === "unique") {
-      title = obj.name;
+      const gained = obj.done ? obj.xp : 0;
+      title = `${obj.name} (${obj.xp} / ${gained} XP)`;
       badge.innerText = obj.done ? "✅" : "⭐";
       xp = obj.xp;
+      
       canValidate = !obj.done;
       if (obj.done) label.style.textDecoration = "line-through";
         } else if (obj.type === "milestone") {
@@ -474,17 +582,19 @@ function renderObjectives() {
         xp = 0;
       } else if (!next && lastDone) {
         // terminé
-        label.innerText = `${obj.prefix} ${lastDone.count} ${obj.suffix} ✅`;
+        const gained = doneSteps.reduce((s, st) => s + (st.xp || 0), 0);
+        label.innerText = `${obj.prefix} ${lastDone.count} ${obj.suffix} ✅ (${0} / ${gained} XP)`;
         badge.innerText = "✅";
         canValidate = false;
         xp = 0;
         label.style.textDecoration = "line-through";
       } else {
         // actif (prochain palier)
+        const gained = doneSteps.reduce((s, st) => s + (st.xp || 0), 0);
         const lastDoneHtml = lastDone
           ? `<div style="opacity:.65;text-decoration:line-through;">${obj.prefix} ${lastDone.count} ${obj.suffix} ✅</div>`
           : "";
-        const nextHtml = `<div><strong>${obj.prefix} ${next.count} ${obj.suffix}</strong></div>`;
+        const nextHtml = `<div><strong>${obj.prefix} ${next.count} ${obj.suffix}</strong> <span class="hint">(${next.xp} / ${gained} XP)</span></div>`;
 
         label.innerHTML = `${lastDoneHtml}${nextHtml}`;
         badge.innerText = "📈";
@@ -669,6 +779,11 @@ startBtn.onclick = () => {
 };
 
 // back buttons
+openPerformanceBtn.onclick = () => {
+  showScreen(performanceScreen);
+  renderPerformanceScreen();
+};
+
 backHomeBtn.onclick = () => goHome();
 openSettingsBtn.onclick = () => {
     settingsReturnTo = "home";
@@ -683,6 +798,11 @@ backFromSettingsBtn.onclick = () => {
     showScreen(homeScreen);
     renderHome();
   }
+};
+
+backFromPerformanceBtn.onclick = () => {
+  showScreen(homeScreen);
+  renderHome();
 };
 
 // world quick settings (future hook)

@@ -33,33 +33,45 @@
       <!-- Onglet stats -->
       <div id="homeStats">
         <div class="card">
-          <p><strong>Joueuse :</strong> <span id="playerName"></span></p>
+          <h3>Joueuse</h3>
+          <p><strong>Pseudo :</strong> <span id="playerName"></span></p>
           <p><strong>Niveau :</strong> <span id="globalLevel"></span></p>
           <p><strong>XP totale :</strong> <span id="globalXp"></span></p>
+          <p><strong>Temps passé :</strong> <span id="globalTimeHours"></span> h</p>
         </div>
 
+
         <div class="card">
-          <h3>Objectif hebdomadaire</h3>
-          <div class="segmented" id="weekLoadPicker">
-            <button data-load="busy">Chargée</button>
-            <button data-load="normal" class="active">Normale</button>
-            <button data-load="light">Légère</button>
+          <h3>Objectifs</h3>
+
+          <div class="subsection">
+            <h4>Hebdomadaire</h4>
+            <div class="segmented" id="weekLoadPicker">
+              <button data-load="busy">Chargée</button>
+              <button data-load="normal" class="active">Normale</button>
+              <button data-load="light">Légère</button>
+            </div>
+            <p><span id="weekXp"></span> / <span id="weekGoal"></span> XP</p>
+            <div class="progress-bar"><div class="progress-fill" id="weekProgress">0%</div></div>
           </div>
-          <p><span id="weekXp"></span> / <span id="weekGoal"></span> XP</p>
-          <div class="progress-bar"><div class="progress-fill" id="weekProgress">0%</div></div>
+
+          <div class="subsection" style="margin-top:12px;">
+            <h4>Mensuel</h4>
+            <p><span id="monthXp"></span> / <span id="monthGoal"></span> XP</p>
+            <div class="progress-bar"><div class="progress-fill" id="monthProgress">0%</div></div>
+          </div>
+
+          <button id="openPerformanceBtn" class="ghost" style="margin-top:12px;">📈 Performances passées</button>
         </div>
 
-        <div class="card">
-          <h3>Objectif mensuel</h3>
-          <p><span id="monthXp"></span> / <span id="monthGoal"></span> XP</p>
-          <div class="progress-bar"><div class="progress-fill" id="monthProgress">0%</div></div>
-        </div>
-      </div>
 
       <!-- Onglet mondes -->
       <div id="homeWorlds">
-        <div id="worldsList" class="worlds-grid"></div>
-        <button id="openAddWorldBtn">➕ Ajouter un monde</button>
+        <div class="card">
+          <h3>Parcourir les mondes</h3>
+          <div id="worldsList" class="worlds-grid"></div>
+          <button id="openAddWorldBtn">➕ Ajouter un monde</button>
+        </div>
 
         <div id="addWorldModal" class="modal hidden" role="dialog" aria-modal="true">
           <div class="modal-content card">
@@ -103,15 +115,15 @@
 
       <div id="worldStats" class="tab-panel">
         <div class="card">
+          <h3>Stats</h3>
           <p><strong>Niveau du monde :</strong> <span id="worldLevel"></span></p>
           <p><strong>XP semaine :</strong> <span id="worldWeekXp"></span></p>
           <p><strong>XP totale :</strong> <span id="worldTotalXp"></span></p>
-        </div>
-        <div class="card">
           <p><strong>Règle XP :</strong> <span id="worldRuleText"></span></p>
           <p><strong>Temps total :</strong> <span id="worldTotalTime"></span> min</p>
         </div>
       </div>
+
 
       <div id="worldInput" class="tab-panel hidden">
         <div class="card">
@@ -178,6 +190,34 @@
           </div>
 
           <button id="createObjectiveBtn">Ajouter</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Onglet performances -->
+    <section id="performanceScreen" class="hidden">
+      <header class="topbar">
+        <button id="backFromPerformanceBtn" class="icon-btn" aria-label="Retour">←</button>
+        <h2>📈 Performances passées</h2>
+        <div style="width:40px;"></div>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="perfWeek">Semaine</button>
+        <button class="tab-btn" data-tab="perfMonth">Mois</button>
+      </div>
+
+      <div id="perfWeek" class="tab-panel">
+        <div class="card">
+          <h3>Historique (Semaine)</h3>
+          <div id="perfWeekList"></div>
+        </div>
+      </div>
+
+      <div id="perfMonth" class="tab-panel hidden">
+        <div class="card">
+          <h3>Historique (Mois)</h3>
+          <div id="perfMonthList"></div>
         </div>
       </div>
     </section>

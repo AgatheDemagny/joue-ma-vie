@@ -145,6 +145,13 @@ input:focus, select:focus {
   color: rgba(255,255,255,0.55);
 }
 
+.subsection h4{
+  margin: 6px 0 4px;
+  text-align: left;
+  font-size: 14px;
+  opacity: .9;
+}
+
 /* ================== CARDS ================== */
 .card {
   background: var(--bg-card);
@@ -302,7 +309,7 @@ input:focus, select:focus {
 .modal{
   position:fixed;
   inset:0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.78); backdrop-filter: blur(2px);
   display:flex;
   align-items:flex-end;
   justify-content:center;
@@ -313,6 +320,11 @@ input:focus, select:focus {
 .modal-content{
   width:100%;
   max-width:420px;
+}
+
+.modal-content.card{
+  background: rgba(18, 12, 18, 0.96);
+  border: 1px solid rgba(255,255,255,0.14);
 }
 
 .inline{
@@ -410,3 +422,4 @@ input:focus, select:focus {
   input, select, button { font-size: 16px; padding: 10px; }
   .grid-3{ grid-template-columns: 1fr; }
 }
+
