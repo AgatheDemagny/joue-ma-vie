@@ -30,6 +30,8 @@ function defaultData() {
     version: DATA_VERSION,
     playerName: null,
 
+    meta: { updatedAt: Date.now() },
+
     // goals configurable
     settings: {
       weekLoad: "normal",
@@ -71,6 +73,8 @@ function load() {
   if (!data.global) data.global = defaultData().global;
   if (!data.worlds) data.worlds = {};
   if (data.settings.weekGoals == null) data.settings.weekGoals = defaultData().settings.weekGoals;
+  if (!data.meta) data.meta = { updatedAt: Date.now() };
+  if (!data.meta.updatedAt) data.meta.updatedAt = Date.now();
 
   // reset week/month if keys changed
   const wk = getISOWeekKey();
@@ -90,7 +94,12 @@ function load() {
 }
 
 function save() {
+  state.meta = state.meta || {};
+  state.meta.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  // si connectée : sauvegarde cloud (avec debounce)
+  scheduleCloudSave();
 }
 
 let state = load();
@@ -1067,5 +1076,102 @@ if ("serviceWorker" in navigator) {
   auth.onAuthStateChanged((user) => {
     if (user) setLoggedInUI(user);
     else setLoggedOutUI();
+  });
+})();
+
+// ================== FIRESTORE CLOUD SAVE ==================
+let cloudAuthUser = null;
+let cloudDb = null;
+let cloudSaveTimer = null;
+
+// doc: users/{uid}/app/save
+function cloudSaveRef(uid) {
+  return cloudDb.collection("users").doc(uid).collection("app").doc("save");
+}
+
+function initCloudDbIfReady() {
+  if (!window.firebase || !firebase.firestore || !firebase.auth) return false;
+  if (!cloudDb) cloudDb = firebase.firestore();
+  return true;
+}
+
+function scheduleCloudSave() {
+  // pas connectée -> rien
+  if (!cloudAuthUser) return;
+  if (!initCloudDbIfReady()) return;
+
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(() => {
+    pushCloudSave().catch(console.error);
+  }, 800);
+}
+
+async function pushCloudSave() {
+  if (!cloudAuthUser) return;
+  if (!initCloudDbIfReady()) return;
+
+  const uid = cloudAuthUser.uid;
+  const ref = cloudSaveRef(uid);
+
+  await ref.set(
+    {
+      updatedAt: state?.meta?.updatedAt || Date.now(),
+      state: state
+    },
+    { merge: true }
+  );
+
+  console.log("☁️ Cloud save ok");
+}
+
+async function pullCloudAndMerge() {
+  if (!cloudAuthUser) return;
+  if (!initCloudDbIfReady()) return;
+
+  const uid = cloudAuthUser.uid;
+  const ref = cloudSaveRef(uid);
+  const snap = await ref.get();
+
+  // Si rien en cloud : on pousse le local (première connexion)
+  if (!snap.exists) {
+    await pushCloudSave();
+    showPopup("☁️ Sauvegarde cloud créée");
+    return;
+  }
+
+  const cloud = snap.data() || {};
+  const cloudState = cloud.state;
+  const cloudUpdatedAt = cloud.updatedAt || 0;
+  const localUpdatedAt = state?.meta?.updatedAt || 0;
+
+  // règle simple : la plus récente gagne
+  if (cloudState && cloudUpdatedAt > localUpdatedAt) {
+    state = cloudState;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    showPopup("☁️ Données récupérées");
+    renderOnboardingOrHome();
+  } else {
+    // local plus récent -> push
+    await pushCloudSave();
+    showPopup("☁️ Données synchronisées");
+  }
+}
+
+// Brancher sur l'état de connexion Firebase
+(function hookCloudToAuth(){
+  if (!window.firebase || !firebase.auth) return;
+
+  firebase.auth().onAuthStateChanged(async (user) => {
+    cloudAuthUser = user || null;
+
+    if (cloudAuthUser) {
+      // au login : on récupère/synchronise
+      try {
+        await pullCloudAndMerge();
+      } catch (e) {
+        console.error(e);
+        showPopup("⚠️ Sync cloud impossible");
+      }
+    }
   });
 })();
