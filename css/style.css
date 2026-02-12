@@ -540,3 +540,13 @@ input:focus, select:focus {
 #dialogModal .modal-content{
   animation: dialogPop 0.18s ease-out;
 }
+
+.dialog-input-wrap{
+  margin-top: 10px;
+}
+.dialog-input-wrap.hidden{
+  display:none;
+}
+#dialogInput{
+  width:100%;
+}

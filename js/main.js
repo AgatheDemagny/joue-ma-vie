@@ -270,7 +270,15 @@ function showPopup(text) {
 }
 
 // ===== Custom Dialog (remplace alert/confirm) =====
-function openDialog({ title = "Info", message = "", okText = "OK", cancelText = "Annuler", showCancel = true } = {}) {
+// ===== Custom Dialog (remplace alert/confirm/prompt) =====
+function openDialog({
+  title = "Info",
+  message = "",
+  okText = "OK",
+  cancelText = "Annuler",
+  showCancel = true,
+  input = null // { value, placeholder, type }
+} = {}) {
   return new Promise((resolve) => {
     const modal = document.getElementById("dialogModal");
     const t = document.getElementById("dialogTitle");
@@ -278,8 +286,16 @@ function openDialog({ title = "Info", message = "", okText = "OK", cancelText = 
     const ok = document.getElementById("dialogOkBtn");
     const cancel = document.getElementById("dialogCancelBtn");
 
+    const inputWrap = document.getElementById("dialogInputWrap");
+    const inputEl = document.getElementById("dialogInput");
+
+    // fallback sécurité (au cas où)
     if (!modal || !t || !m || !ok || !cancel) {
-      // fallback sécurité
+      if (input) {
+        const v = prompt(message, input.value ?? "");
+        resolve(v);
+        return;
+      }
       resolve(showCancel ? confirm(message) : (alert(message), true));
       return;
     }
@@ -290,26 +306,44 @@ function openDialog({ title = "Info", message = "", okText = "OK", cancelText = 
     cancel.textContent = cancelText;
     cancel.classList.toggle("hidden", !showCancel);
 
+    // input mode (prompt)
+    const isPrompt = !!input;
+    if (inputWrap && inputEl) {
+      inputWrap.classList.toggle("hidden", !isPrompt);
+      if (isPrompt) {
+        inputEl.type = input.type || "text";
+        inputEl.value = (input.value ?? "").toString();
+        inputEl.placeholder = input.placeholder || "";
+        setTimeout(() => inputEl.focus(), 0);
+      }
+    }
+
     function close(result){
       ok.removeEventListener("click", onOk);
       cancel.removeEventListener("click", onCancel);
       modal.removeEventListener("click", onBackdrop);
       document.removeEventListener("keydown", onKey);
+
       modal.classList.add("hidden");
       modal.style.display = "none";
       modal.setAttribute("aria-hidden", "true");
+
       resolve(result);
     }
 
-    function onOk(){ close(true); }
-    function onCancel(){ close(false); }
+    function onOk(){
+      if (isPrompt && inputEl) return close(inputEl.value);
+      close(true);
+    }
+    function onCancel(){
+      close(isPrompt ? null : false);
+    }
     function onBackdrop(e){
-      // clique hors carte = annuler
-      if (e.target === modal) close(false);
+      if (e.target === modal) onCancel();
     }
     function onKey(e){
-      if (e.key === "Escape") close(false);
-      if (e.key === "Enter") close(true);
+      if (e.key === "Escape") onCancel();
+      if (e.key === "Enter") onOk();
     }
 
     ok.addEventListener("click", onOk);
@@ -329,6 +363,24 @@ function uiConfirm(message, title = "Confirmation") {
 
 function uiAlert(message, title = "Info") {
   return openDialog({ title, message, okText: "OK", showCancel: false });
+}
+
+function uiPrompt(message, {
+  title = "Saisie",
+  value = "",
+  placeholder = "",
+  type = "text",
+  okText = "Valider",
+  cancelText = "Annuler"
+} = {}) {
+  return openDialog({
+    title,
+    message,
+    okText,
+    cancelText,
+    showCancel: true,
+    input: { value, placeholder, type }
+  });
 }
 
 
@@ -501,6 +553,7 @@ function renderHomeStats() {
     b.onclick = async () => {
       const nextLoad = b.dataset.load;
       const current = state.settings.weekLoad;
+
       if (nextLoad === current) return;
 
       const label = nextLoad === "busy" ? "chargée" : nextLoad === "normal" ? "normale" : "légère";
@@ -731,7 +784,7 @@ function renderEntries() {
   });
 }
 
-function deleteEntry(entryId) {
+async function deleteEntry(entryId) {
   const w = state.worlds[state.activeWorldId];
   if (!w || !Array.isArray(w.entries)) return;
 
@@ -739,11 +792,11 @@ function deleteEntry(entryId) {
   if (!entry) return;
 
   if (!canDeleteEntry(entry)) {
-    alert("Tu ne peux supprimer une saisie qu’à moins de 24h.");
+    await uiAlert("Tu ne peux supprimer une saisie qu’à moins de 24h.", "Suppression");
     return;
   }
 
-  const ok = confirm(`Supprimer cette saisie (${entry.minutes} min, -${entry.xp} XP) ?`);
+  const ok = await uiConfirm(`Supprimer cette saisie (${entry.minutes} min, -${entry.xp} XP) ?`, "Suppression");
   if (!ok) return;
 
   // Retirer l'entry
@@ -803,16 +856,16 @@ function closeAddWorldModal() {
   xpBaseInput.value = "";
 }
 
-createWorldBtn.onclick = () => {
+createWorldBtn.onclick = async () => {
   const name = worldNameInput.value.trim();
   const icon = worldIconInput.value.trim();
   const minutes = parseInt(minutesBaseInput.value, 10);
   const xp = parseInt(xpBaseInput.value, 10);
 
-  if (!name) return alert("Nom du monde requis");
-  if (!icon) return alert("Icône requise (emoji)");
-  if (!Number.isFinite(minutes) || minutes <= 0) return alert("Minutes invalides");
-  if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalides");
+  if (!name) return uiAlert("Nom du monde requis", "Créer un monde");
+  if (!icon) return uiAlert("Icône requise (emoji)", "Créer un monde");
+  if (!Number.isFinite(minutes) || minutes <= 0) return uiAlert("Minutes invalides", "Créer un monde");
+  if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalides", "Créer un monde");
 
   const id = "world-" + Date.now();
 
@@ -832,9 +885,9 @@ createWorldBtn.onclick = () => {
 };
 
 // onboarding
-startBtn.onclick = () => {
+startBtn.onclick = async () => {
   const name = (playerNameInput.value || "").trim();
-  if (!name) return alert("Entre un pseudo");
+  if (!name) return uiAlert("Entre un pseudo", "Bienvenue");
   state.playerName = name;
   save();
   renderOnboardingOrHome();
@@ -880,7 +933,7 @@ validateTimeBtn.onclick = () => {
   if (!w) return;
 
   const minutes = parseInt(timeMinutesInput.value, 10);
-  if (!Number.isFinite(minutes) || minutes <= 0) return alert("Minutes invalides");
+  if (!Number.isFinite(minutes) || minutes <= 0) return uiAlert("Minutes invalides", "Saisie temps");
 
   const xp = calculateTimeXp(w, minutes);
 
@@ -917,15 +970,15 @@ function refreshObjectiveTypeUI() {
 objectiveTypeSelect.onchange = refreshObjectiveTypeUI;
 refreshObjectiveTypeUI();
 
-addMilestoneStepBtn.onclick = () => {
+addMilestoneStepBtn.onclick = async () => {
   const count = parseInt(milestoneCountInput.value, 10);
   const xp = parseInt(milestoneXpInput.value, 10);
-  if (!Number.isFinite(count) || count <= 0) return alert("Palier invalide");
-  if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
+  if (!Number.isFinite(count) || count <= 0) return uiAlert("Palier invalide", "Objectifs");
+  if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalide", "Objectifs");
   // Empêche d'ajouter un palier <= au dernier palier (ordre obligatoire)
   const last = draftMilestoneSteps[draftMilestoneSteps.length - 1];
   if (last && count <= last.count) {
-    return alert(`Ajoute des paliers dans l’ordre (ex : ${last.count + 1}, puis plus grand).`);
+    return uiAlert(`Ajoute des paliers dans l’ordre (ex : ${last.count + 1}, puis plus grand).`, "Objectifs");
   }
 
   draftMilestoneSteps.push({ count, xp, done: false });
@@ -946,15 +999,15 @@ function renderMilestonePreview() {
   });
 }
 
-createMilestoneObjectiveBtn.onclick = () => {
+createMilestoneObjectiveBtn.onclick = async () => {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
   const prefix = milestonePrefixInput.value.trim();
   const suffix = milestoneSuffixInput.value.trim();
-  if (!prefix) return alert("Texte 1 requis (ex : Lire)");
-  if (!suffix) return alert("Texte 2 requis (ex : livres)");
-  if (draftMilestoneSteps.length === 0) return alert("Ajoute au moins un palier");
+  if (!prefix) return uiAlert("Texte 1 requis (ex : Lire)", "Objectifs");
+  if (!suffix) return uiAlert("Texte 2 requis (ex : livres)", "Objectifs");
+  if (draftMilestoneSteps.length === 0) return uiAlert("Ajoute au moins un palier", "Objectifs");
 
   const id = "obj-" + Date.now();
 
@@ -977,7 +1030,7 @@ createMilestoneObjectiveBtn.onclick = () => {
   renderObjectives();
 };
 
-createObjectiveBtn.onclick = () => {
+createObjectiveBtn.onclick = async () => {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
@@ -987,7 +1040,7 @@ createObjectiveBtn.onclick = () => {
   if (t === "repeatable") {
     const name = objNameInput.value.trim();
     const xp = parseInt(objXpInput.value, 10);
-    if (!name) return alert("Nom requis");
+    if (!name) return uiAlert("Nom requis");
     if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
 
     w.objectives.push({ id, type: "repeatable", name, xp, doneCount: 0 });
@@ -999,7 +1052,7 @@ createObjectiveBtn.onclick = () => {
   if (t === "unique") {
     const name = objNameUniqueInput.value.trim();
     const xp = parseInt(objXpUniqueInput.value, 10);
-    if (!name) return alert("Nom requis");
+    if (!name) return uiAlert("Nom requis");
     if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
 
     w.objectives.push({ id, type: "unique", name, xp, done: false });
@@ -1013,14 +1066,16 @@ createObjectiveBtn.onclick = () => {
   renderObjectives();
 };
 
-function validateObjective(objectiveId) {
+async function validateObjective(objectiveId) {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
   const obj = (w.objectives || []).find(o => o.id === objectiveId);
   if (!obj) return;
 
-  if (!confirm("Valider cet objectif ?")) return;
+  const ok = await uiConfirm("Valider cet objectif ?", "Objectifs");
+  if (!ok) return;
+
 
   if (obj.type === "repeatable") {
     obj.doneCount = (obj.doneCount || 0) + 1;
@@ -1094,22 +1149,45 @@ function renderManageWorlds() {
     const edit = document.createElement("button");
     edit.className = "ghost";
     edit.innerText = "Règle XP";
-    edit.onclick = () => {
-      const m = prompt(`Minutes de base pour ${w.name} ? (actuel: ${w.rules.minutesBase})`, w.rules.minutesBase);
+    edit.onclick = async () => {
+      const m = await uiPrompt(
+        `Minutes de base pour ${w.name} ?`,
+        {
+          title: "Règle XP",
+          value: w.rules.minutesBase,
+          type: "number",
+          placeholder: "Ex: 30"
+        }
+      );
+
       if (m === null) return;
-      const x = prompt(`XP de base pour ${w.name} ? (actuel: ${w.rules.xpBase})`, w.rules.xpBase);
+
+      const x = await uiPrompt(
+        `XP de base pour ${w.name} ?`,
+        {
+          title: "Règle XP",
+          value: w.rules.xpBase,
+          type: "number",
+          placeholder: "Ex: 10"
+        }
+      );
+
       if (x === null) return;
 
       const mm = parseInt(m, 10);
       const xx = parseInt(x, 10);
+
       if (!Number.isFinite(mm) || mm <= 0 || !Number.isFinite(xx) || xx <= 0) {
-        alert("Valeurs invalides");
+        await uiAlert("Valeurs invalides", "Règle XP");
         return;
       }
+
       w.rules.minutesBase = mm;
       w.rules.xpBase = xx;
+
       save();
       showPopup("✅ Règle mise à jour");
+
       if (state.activeWorldId === w.id) renderWorldStats();
     };
 
@@ -1127,7 +1205,7 @@ saveGoalsBtn.onclick = () => {
   const l = parseInt(weekGoalLightInput.value, 10);
 
   if (![mg, b, n, l].every(v => Number.isFinite(v) && v > 0)) {
-    alert("Valeurs invalides");
+    return uiAlert("Valeurs invalides", "Paramètres");
     return;
   }
 
@@ -1139,15 +1217,17 @@ saveGoalsBtn.onclick = () => {
   renderHomeStats();
 };
 
-resetGameBtn.onclick = () => {
-  const ok1 = confirm("Es-tu sûre de vouloir supprimer toutes les données ?");
+resetGameBtn.onclick = async () => {
+  const ok1 = await uiConfirm("Es-tu sûre de vouloir supprimer toutes les données ?", "Réinitialisation");
   if (!ok1) return;
-  const ok2 = confirm("Dernière confirmation : tout sera perdu. Continuer ?");
+
+  const ok2 = await uiConfirm("Dernière confirmation : tout sera perdu. Continuer ?", "Réinitialisation");
   if (!ok2) return;
 
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
 };
+
 
 // ================== Tab init (home/world) ==================
 (function initTabs() {
@@ -1219,7 +1299,7 @@ if ("serviceWorker" in navigator) {
   async function signup() {
     const email = (authEmail?.value || "").trim();
     const pass = (authPassword?.value || "").trim();
-    if (!email || !pass) return alert("Email et mot de passe requis");
+    if (!email || !pass) return uiAlert("Email et mot de passe requis", "Connexion");
     try {
       await auth.createUserWithEmailAndPassword(email, pass);
       showPopup("✅ Compte créé");
@@ -1231,7 +1311,7 @@ if ("serviceWorker" in navigator) {
   async function login() {
     const email = (authEmail?.value || "").trim();
     const pass = (authPassword?.value || "").trim();
-    if (!email || !pass) return alert("Email et mot de passe requis");
+    if (!email || !pass) return uiAlert("Email et mot de passe requis", "Connexion");
     try {
       await auth.signInWithEmailAndPassword(email, pass);
       showPopup("✅ Connectée");
