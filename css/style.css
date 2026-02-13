@@ -70,7 +70,6 @@ h1, h2, h3 {
 
 /* ================== BOUTONS ================== */
 button {
-  width: 100%;
   cursor: pointer;
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 14px;
@@ -82,6 +81,13 @@ button {
   box-shadow: 0 10px 24px rgba(0,0,0,0.30);
   transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
 }
+
+/* Bouton plein largeur uniquement quand on le décide */
+.btn-block {
+  width: 100%;
+  display: block;
+}
+
 
 button:hover {
   background: var(--accent-soft);
@@ -563,4 +569,19 @@ button.icon-btn {
 }
 #dialogInput{
   width:100%;
+}
+
+/* Uniformisation textes */
+label, .label, .hint {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.card p {
+  font-size: 15px;
+  margin: 8px 0;
+}
+
+.card strong {
+  font-weight: 800;
 }

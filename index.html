@@ -62,7 +62,7 @@
             <div class="progress-bar"><div class="progress-fill" id="monthProgress">0%</div></div>
           </div>
 
-          <button id="openPerformanceBtn" class="ghost" style="margin-top:12px;">📈 Performances passées</button>
+          <button id="openPerformanceBtn" class="ghost btn-block">📊 XP passées</button>
         </div>
 
 
@@ -71,7 +71,7 @@
         <div class="card">
           <h3>Parcourir les mondes</h3>
           <div id="worldsList" class="worlds-grid"></div>
-          <button id="openAddWorldBtn">➕ Ajouter un monde</button>
+          <button class="btn-block" id="openAddWorldBtn">🌄 Ajouter un monde</button>
         </div>
 
         <div id="addWorldModal" class="modal hidden" role="dialog" aria-modal="true">
@@ -130,7 +130,7 @@
         <div class="card">
           <h3>Saisir du temps</h3>
           <input id="timeMinutesInput" type="number" min="1" inputmode="numeric" placeholder="Minutes (ex : 45)" />
-          <button id="validateTimeBtn">Valider</button>
+          <button class="btn-block" id="validateTimeBtn">Valider</button>
           <p class="hint" id="timePreview"></p>
         </div>
 
@@ -190,7 +190,7 @@
             <button id="createMilestoneObjectiveBtn">Créer l’objectif palier</button>
           </div>
 
-          <button id="createObjectiveBtn">Ajouter</button>
+          <button class="btn-block" id="createObjectiveBtn">Ajouter</button>
         </div>
       </div>
     </section>
@@ -199,7 +199,7 @@
     <section id="performanceScreen" class="hidden">
       <header class="topbar">
         <button id="backFromPerformanceBtn" class="icon-btn" aria-label="Retour">←</button>
-        <h2>📈 Performances passées</h2>
+        <h2>📊 XP passées</h2>
         <div style="width:40px;"></div>
       </header>
 
@@ -273,7 +273,7 @@
             <input id="weekGoalLightInput" type="number" min="1" inputmode="numeric" />
           </div>
         </div>
-        <button id="saveGoalsBtn">Enregistrer</button>
+        <button class="btn-block" id="saveGoalsBtn">Enregistrer</button>
       </div>
 
       <div class="card">
@@ -283,7 +283,7 @@
       <div class="card danger">
         <h3>Réinitialiser</h3>
         <p class="hint">Supprime toutes les données (pseudo, mondes, XP…).</p>
-        <button id="resetGameBtn" class="danger-btn">🔥 Réinitialiser le jeu</button>
+        <button id="resetGameBtn" class="btn-block danger-btn">👾 Réinitialiser le jeu</button>
       </div>
     </section>
 
