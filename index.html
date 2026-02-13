@@ -231,27 +231,31 @@
         <div style="width:40px;"></div>
       </header>
 
-              <div class="card">
+        <div class="card">
           <h3>Compte</h3>
-          <p class="hint" id="authStatus">Non connectée</p>
 
-          <label>Email</label>
-          <input id="authEmail" type="email" placeholder="ex : moi@email.com" autocomplete="email" />
+          <!-- UTILISATEUR NON CONNECTÉ -->
+          <div id="accountLoggedOut">
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Mot de passe">
 
-          <label>Mot de passe</label>
-          <input id="authPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
-
-          <div class="actions">
-            <button id="btnLogin">Se connecter</button>
-            <button id="btnSignup" class="ghost" type="button">Créer un compte</button>
+            <div class="actions">
+              <button id="loginBtn">Se connecter</button>
+              <button id="signupBtn">Créer un compte</button>
+            </div>
           </div>
 
-          <div class="actions">
-            <button id="btnLogout" class="ghost hidden" type="button">Se déconnecter</button>
-          </div>
+          <!-- UTILISATEUR CONNECTÉ -->
+          <div id="accountLoggedIn" class="hidden">
+            <p><strong>Pseudo :</strong> <span id="accountPseudo"></span></p>
+            <p><strong>Email :</strong> <span id="accountEmail"></span></p>
 
-          <p class="hint">La sauvegarde cloud arrive juste après (prochaine étape).</p>
+            <button id="logoutBtn" class="danger-btn btn-block">
+              Se déconnecter
+            </button>
+          </div>
         </div>
+
 
       <div class="card">
         <h3>Objectifs</h3>

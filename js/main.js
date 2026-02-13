@@ -1228,6 +1228,13 @@ resetGameBtn.onclick = async () => {
   location.reload();
 };
 
+auth.onAuthStateChanged(() => {
+  renderAccountSection();
+});
+
+document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+  await auth.signOut();
+});
 
 // ================== Tab init (home/world) ==================
 (function initTabs() {
@@ -1295,6 +1302,25 @@ if ("serviceWorker" in navigator) {
     if (authStatus) authStatus.textContent = `Connectée : ${user.email}`;
     btnLogout?.classList.remove("hidden");
   }
+
+  function renderAccountSection() {
+  const user = auth.currentUser;
+
+  const loggedOut = document.getElementById("accountLoggedOut");
+  const loggedIn = document.getElementById("accountLoggedIn");
+
+  if (user) {
+    loggedOut.classList.add("hidden");
+    loggedIn.classList.remove("hidden");
+
+    document.getElementById("accountEmail").textContent = user.email;
+    document.getElementById("accountPseudo").textContent =
+      localStorage.getItem("playerName") || "Joueuse";
+  } else {
+    loggedOut.classList.remove("hidden");
+    loggedIn.classList.add("hidden");
+  }
+}
 
   async function signup() {
     const email = (authEmail?.value || "").trim();
