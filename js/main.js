@@ -251,6 +251,7 @@ function forceOpenAddWorldModal() {
 // ================== UI helpers ==================
 function showScreen(which) {
   [loginScreen, onboardingScreen, homeScreen, worldScreen, settingsScreen, performanceScreen]
+    .filter(Boolean)
     .forEach(s => s.classList.add("hidden"));
   which.classList.remove("hidden");
 }
@@ -1297,6 +1298,10 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+let cloudAuthUser = null;
+let cloudDb = null;
+let cloudSaveTimer = null;
+
 // ================== FIREBASE AUTH (Email/MDP) ==================
 (function setupFirebaseAuth(){
   // UI (écran login)
@@ -1391,10 +1396,6 @@ if ("serviceWorker" in navigator) {
 })();
 
 // ================== FIRESTORE CLOUD SAVE ==================
-let cloudAuthUser = null;
-let cloudDb = null;
-let cloudSaveTimer = null;
-
 // doc: users/{uid}/app/save
 function cloudSaveRef(uid) {
   return cloudDb.collection("users").doc(uid).collection("app").doc("save");
