@@ -250,8 +250,11 @@
 
       <div class="card">
         <h3>Compte</h3>
-        <p class="hint" id="accountEmailLine"></p>
-        <button id="btnLogout" class="danger-btn">Se déconnecter</button>
+
+        <p><strong>Pseudo :</strong> <span id="accountPseudoLine">—</span></p>
+        <p><strong>Email :</strong> <span id="accountEmailLine">—</span></p>
+
+        <button id="btnLogout" class="danger-btn btn-block">Se déconnecter</button>
       </div>
 
       <div class="card">
@@ -279,14 +282,40 @@
 
       <div class="card">
         <h3>Mondes</h3>
-        <div id="manageWorldsList"></div>
+
+        <div class="subsection">
+          <h4>Mondes actifs</h4>
+          <div id="manageWorldsActiveList"></div>
+        </div>
+
+        <div class="subsection" style="margin-top:12px;">
+          <h4>Mondes archivés</h4>
+          <div id="manageWorldsArchivedList"></div>
+        </div>
       </div>
+
       <div class="card danger">
         <h3>Réinitialiser</h3>
         <p class="hint">Supprime toutes les données (pseudo, mondes, XP…).</p>
         <button id="resetGameBtn" class="btn-block danger-btn">👾 Réinitialiser le jeu</button>
       </div>
     </section>
+
+    <!-- MODAL: Modifier monde -->
+    <div id="manageWorldModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal-content card">
+        <h3 id="manageWorldTitle">Modifier monde</h3>
+
+        <div class="actions">
+          <button id="mwToggleBtn" class="ghost">Désactiver</button>
+          <button id="mwRuleBtn" class="ghost">Règle XP</button>
+        </div>
+
+        <button id="mwDeleteBtn" class="danger-btn btn-block">🗑️ Supprimer le monde</button>
+
+        <button id="mwCloseBtn" class="ghost btn-block" type="button">Fermer</button>
+      </div>
+    </div>
 
     <!-- POPUP -->
     <div id="popup"></div>

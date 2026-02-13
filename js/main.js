@@ -220,7 +220,8 @@ const weekGoalNormalInput = el("weekGoalNormalInput");
 const weekGoalLightInput = el("weekGoalLightInput");
 const saveGoalsBtn = el("saveGoalsBtn");
 
-const manageWorldsList = el("manageWorldsList");
+const manageWorldsActiveList = el("manageWorldsActiveList");
+const manageWorldsArchivedList = el("manageWorldsArchivedList");
 const resetGameBtn = el("resetGameBtn");
 
 // popup
@@ -1129,18 +1130,34 @@ function renderSettings() {
   weekGoalLightInput.value = state.settings.weekGoals.light;
 
   renderManageWorlds();
+  // Compte: pseudo + email
+  const u = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
+  const pseudoLine = document.getElementById("accountPseudoLine");
+  const emailLine = document.getElementById("accountEmailLine");
+  if (pseudoLine) pseudoLine.textContent = state?.playerName || "—";
+  if (emailLine) emailLine.textContent = u?.email || "—";
 }
 
 function renderManageWorlds() {
-  manageWorldsList.innerHTML = "";
+  if (!manageWorldsActiveList || !manageWorldsArchivedList) return;
 
-  const worlds = Object.values(state.worlds);
-  if (worlds.length === 0) {
-    manageWorldsList.innerHTML = `<p class="hint">Aucun monde à gérer pour l’instant.</p>`;
-    return;
+  manageWorldsActiveList.innerHTML = "";
+  manageWorldsArchivedList.innerHTML = "";
+
+  const worlds = Object.values(state.worlds || {});
+  const activeWorlds = worlds.filter(w => w && w.active !== false);
+  const archivedWorlds = worlds.filter(w => w && w.active === false);
+
+  // --- empty states
+  if (activeWorlds.length === 0) {
+    manageWorldsActiveList.innerHTML = `<p class="hint">Aucun monde actif pour le moment.</p>`;
+  }
+  if (archivedWorlds.length === 0) {
+    manageWorldsArchivedList.innerHTML = `<p class="hint">Aucun monde archivé pour le moment.</p>`;
   }
 
-  worlds.forEach(w => {
+  // --- Actifs: Supprimer (= archiver) + Règle XP
+  activeWorlds.forEach(w => {
     const row = document.createElement("div");
     row.className = "objective-row";
 
@@ -1148,45 +1165,44 @@ function renderManageWorlds() {
     label.className = "label";
     label.innerText = `${w.icon} ${w.name}`;
 
-    const toggle = document.createElement("button");
-    toggle.innerText = w.active === false ? "Réactiver" : "Désactiver";
-    toggle.onclick = () => {
-      w.active = w.active === false ? true : false;
-      // if deactivating current world, go home
-      if (state.activeWorldId === w.id && w.active === false) {
-        state.activeWorldId = null;
-      }
+    const archiveBtn = document.createElement("button");
+    archiveBtn.innerText = "Supprimer";
+    archiveBtn.onclick = async () => {
+      const ok = await uiConfirm(
+        `Archiver ${w.icon} ${w.name} ?\n(Il disparaît de l’accueil, mais tes XP ne changent pas.)`,
+        "Supprimer un monde"
+      );
+      if (!ok) return;
+
+      w.active = false;
+
+      // si on archive le monde ouvert, on sort
+      if (state.activeWorldId === w.id) state.activeWorldId = null;
+
       save();
       renderManageWorlds();
       renderWorlds();
+      renderHomeStats();
     };
 
-    const edit = document.createElement("button");
-    edit.className = "ghost";
-    edit.innerText = "Règle XP";
-    edit.onclick = async () => {
-      const m = await uiPrompt(
-        `Minutes de base pour ${w.name} ?`,
-        {
-          title: "Règle XP",
-          value: w.rules.minutesBase,
-          type: "number",
-          placeholder: "Ex: 30"
-        }
-      );
-
+    const ruleBtn = document.createElement("button");
+    ruleBtn.className = "ghost";
+    ruleBtn.innerText = "Règle XP";
+    ruleBtn.onclick = async () => {
+      const m = await uiPrompt(`Minutes de base pour ${w.name} ?`, {
+        title: "Règle XP",
+        value: w.rules.minutesBase,
+        type: "number",
+        placeholder: "Ex: 30"
+      });
       if (m === null) return;
 
-      const x = await uiPrompt(
-        `XP de base pour ${w.name} ?`,
-        {
-          title: "Règle XP",
-          value: w.rules.xpBase,
-          type: "number",
-          placeholder: "Ex: 10"
-        }
-      );
-
+      const x = await uiPrompt(`XP de base pour ${w.name} ?`, {
+        title: "Règle XP",
+        value: w.rules.xpBase,
+        type: "number",
+        placeholder: "Ex: 10"
+      });
       if (x === null) return;
 
       const mm = parseInt(m, 10);
@@ -1202,14 +1218,41 @@ function renderManageWorlds() {
 
       save();
       showPopup("✅ Règle mise à jour");
-
       if (state.activeWorldId === w.id) renderWorldStats();
     };
 
     row.appendChild(label);
-    row.appendChild(toggle);
-    row.appendChild(edit);
-    manageWorldsList.appendChild(row);
+    row.appendChild(archiveBtn);
+    row.appendChild(ruleBtn);
+    manageWorldsActiveList.appendChild(row);
+  });
+
+  // --- Archivés: Restaurer
+  archivedWorlds.forEach(w => {
+    const row = document.createElement("div");
+    row.className = "objective-row";
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.innerText = `${w.icon} ${w.name}`;
+
+    const restoreBtn = document.createElement("button");
+    restoreBtn.className = "ghost";
+    restoreBtn.innerText = "Restaurer";
+    restoreBtn.onclick = async () => {
+      const ok = await uiConfirm(`Restaurer ${w.icon} ${w.name} ?`, "Restaurer un monde");
+      if (!ok) return;
+
+      w.active = true;
+      save();
+      renderManageWorlds();
+      renderWorlds();
+      renderHomeStats();
+    };
+
+    row.appendChild(label);
+    row.appendChild(restoreBtn);
+    manageWorldsArchivedList.appendChild(row);
   });
 }
 
@@ -1232,7 +1275,7 @@ saveGoalsBtn.onclick = () => {
   renderHomeStats();
 };
 
-resetGameBtn.onclick = async () => {
+if (resetGameBtn) resetGameBtn.onclick = async () => {
   const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
   if (!user) return uiAlert("Tu dois être connectée pour réinitialiser le jeu.", "Réinitialisation");
 
@@ -1271,13 +1314,11 @@ renderAfterAuth();
 
 // === PATCH: fermeture du modal "Créer un monde" (inratable) ===
 document.addEventListener("DOMContentLoaded", () => {
-  const modal = document.getElementById("addWorldModal");
   const cancelBtn = document.getElementById("cancelWorldBtn");
-
-  if (cancelBtn && modal) {
+  if (cancelBtn) {
     cancelBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      modal.classList.add("hidden");
+      forceCloseAddWorldModal();
     });
   }
 });

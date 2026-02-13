@@ -90,6 +90,7 @@ button {
 .btn-block {
   width: 100%;
   display: block;
+  margin-top: 12px;
 }
 
 
