@@ -1,23 +1,30 @@
+/* style.css — version complète (clean + stable)
+   ✅ Gardé ton style “galaxy”
+   ✅ Unifie les bordures (orange/terracotta) sur TOUTES les cards
+   ✅ Corrige la topbar + bannière (plus de chevauchement)
+   ✅ Loading plein écran + anti-banding (bruit)
+*/
+
 /* ================== PALETTE ET TYPO (DARK) ================== */
 :root{
   /* Fond */
-  --bg-main: #0B0B0F;                 /* noir profond */
-  --bg-card: rgba(255,255,255,0.06);  /* cartes translucides */
+  --bg-main: #0B0B0F;
+  --bg-card: rgba(255,255,255,0.06);
   --border-soft: rgba(255,255,255,0.10);
 
   /* Texte */
   --text-main: rgba(255,255,255,0.90);
   --text-soft: rgba(255,255,255,0.72);
 
-  /* Palette (tes couleurs) : priorité violet + orange */
-  --purple: #80586D;           /* violet */
-  --orange: #9F5540;           /* orangé/terracotta */
+  /* Palette */
+  --purple: #80586D;
+  --orange: #9F5540;
   --taupe: #9E8277;
   --sand: #C49D83;
 
   /* UI */
-  --accent: var(--orange);      /* boutons principaux */
-  --accent-soft: var(--purple); /* hover/actif */
+  --accent: var(--orange);
+  --accent-soft: var(--purple);
   --chip: rgba(255,255,255,0.10);
 
   /* Progress */
@@ -27,8 +34,13 @@
   /* Danger */
   --danger: #7A3E2F;
 
-  /* NEW: séparateurs */
+  /* Séparateurs */
   --divider: rgba(255,255,255,0.08);
+
+  /* NEW: bordure glow orange (pour tout) */
+  --card-border: rgba(255,120,90,0.45);
+  --card-border-strong: rgba(255,120,90,0.60);
+  --card-glow: rgba(255,90,60,0.28);
 }
 
 button, .time-input {
@@ -46,8 +58,6 @@ button, .time-input {
 body{
   font-family: 'Poppins', sans-serif;
   color: var(--text-main);
-
-  /* NEW: plus coloré (galaxy) */
   background:
     radial-gradient(900px 500px at 20% 0%, rgba(190, 70, 255, 0.22), transparent 60%),
     radial-gradient(900px 500px at 90% 20%, rgba(70, 130, 255, 0.18), transparent 55%),
@@ -56,7 +66,7 @@ body{
 }
 
 .game {
-  padding: 16px; /* NEW: un peu plus d’air */
+  padding: 16px;
   max-width: 420px;
   margin: auto;
 }
@@ -86,13 +96,11 @@ button {
   transition: transform 0.12s ease, filter 0.12s ease, background 0.12s ease;
 }
 
-/* Bouton plein largeur uniquement quand on le décide */
 .btn-block {
   width: 100%;
   display: block;
   margin-top: 12px;
 }
-
 
 button:hover {
   background: var(--accent-soft);
@@ -103,7 +111,6 @@ button:active {
   filter: brightness(0.98);
 }
 
-/* boutons "ghost" (secondaires) */
 .ghost{
   background: rgba(255,255,255,0.08);
   color: var(--text-main);
@@ -138,7 +145,6 @@ button:active {
   background: rgba(255,255,255,0.12);
 }
 
-/* NEW: monde actif + coloré (pas juste gris/violet) */
 .world-btn.active { 
   background: linear-gradient(90deg, rgba(255, 90, 160, 0.30), rgba(120, 80, 255, 0.28));
   border-color: rgba(255,255,255,0.16);
@@ -184,12 +190,13 @@ input:focus, select:focus {
   border-radius: 20px;
   padding: 20px;
 
-  border: 1px solid rgba(180,120,255,0.35);
+  /* ✅ Bordure orange partout */
+  border: 1px solid var(--card-border);
 
   box-shadow:
-    0 0 0 1px rgba(180,120,255,0.15),
+    0 0 0 1px rgba(255,120,90,0.18),
     0 12px 40px rgba(0,0,0,0.35),
-    0 0 25px rgba(140,80,255,0.25);
+    0 0 25px var(--card-glow);
 
   transition: all 0.25s ease;
 }
@@ -197,11 +204,10 @@ input:focus, select:focus {
 .card:hover{
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 1px rgba(180,120,255,0.25),
+    0 0 0 1px rgba(255,120,90,0.28),
     0 18px 50px rgba(0,0,0,0.45),
-    0 0 35px rgba(160,90,255,0.35);
+    0 0 35px rgba(255,120,90,0.28);
 }
-
 
 .card.subtle{
   background: rgba(255,255,255,0.04);
@@ -209,7 +215,7 @@ input:focus, select:focus {
   box-shadow: 0 10px 22px rgba(0,0,0,0.24);
 }
 
-/* NEW: au lieu de gros blocs internes → lignes séparées */
+/* lignes internes */
 .card p{
   display:flex;
   justify-content: space-between;
@@ -229,12 +235,46 @@ input:focus, select:focus {
   color: rgba(255,255,255,0.92);
 }
 
-/* banner */
-.app-banner{
+/* ================== TOPBAR + BANNIÈRE (FIX CHEVAUCHEMENT) ================== */
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ✅ settings à droite */
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+/* zone centrale (titre/bannière) si tu en as une */
+.topbar-center{
   flex: 1;
-  width: 100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 0;
+}
+
+/* bouton settings */
+#openSettingsBtn.icon-btn{
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 14px;
+
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* bannière : centrée + marge propre sous topbar */
+.app-banner{
+  width: 85%;
+  max-width: 420px;
   height: auto;
   display: block;
+  margin: 10px auto 18px auto; /* ✅ espace sous la topbar */
   border-radius: 16px;
   box-shadow: 0 16px 40px rgba(0,0,0,0.35);
 }
@@ -263,7 +303,6 @@ input:focus, select:focus {
   padding-right: 10px;
 }
 
-/* petit effet “scanlines / shine” */
 .progress-fill::after{
   content:"";
   position:absolute;
@@ -277,6 +316,19 @@ input:focus, select:focus {
   );
   opacity: 0.25;
   pointer-events:none;
+}
+
+.progress-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin: 6px 0 10px 0;
+}
+
+.progress-values{
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ================== SECTIONS ================== */
@@ -319,10 +371,8 @@ input:focus, select:focus {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ================== TOPBAR + TABS ================== */
-button.icon-btn {
-  width: 42px;
-}
+/* ================== TABS ================== */
+button.icon-btn { width: 42px; }
 
 .icon-btn{
   width:42px;
@@ -353,11 +403,8 @@ button.icon-btn {
   box-shadow: 0 10px 18px rgba(0,0,0,0.20);
 }
 
-.tab-btn:hover{
-  background: rgba(255,255,255,0.12);
-}
+.tab-btn:hover{ background: rgba(255,255,255,0.12); }
 
-/* NEW: onglet actif plus coloré */
 .tab-btn.active{
   background: linear-gradient(90deg, rgba(255, 90, 160, 0.35), rgba(120, 80, 255, 0.32));
   border-color: rgba(255,255,255,0.16);
@@ -367,8 +414,6 @@ button.icon-btn {
     0 12px 26px rgba(255, 90, 160, 0.10);
 }
 
-.tab-panel{}
-
 /* segmented */
 .segmented{
   display:flex;
@@ -376,7 +421,6 @@ button.icon-btn {
   margin:8px 0 10px;
 }
 
-/* NEW: boutons non sélectionnés moins tristes */
 .segmented button{
   flex:1;
   background: rgba(255,255,255,0.06);
@@ -388,7 +432,6 @@ button.icon-btn {
   background: rgba(255,255,255,0.10);
 }
 
-/* NEW: sélectionné = couleur + glow */
 .segmented button.active{
   background: linear-gradient(90deg, rgba(255, 90, 160, 0.85), rgba(120, 80, 255, 0.85));
   border-color: rgba(255,255,255,0.18);
@@ -402,7 +445,8 @@ button.icon-btn {
 .modal{
   position:fixed;
   inset:0;
-  background: rgba(0,0,0,0.78); backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(2px);
   display:flex;
   align-items:flex-end;
   justify-content:center;
@@ -425,7 +469,6 @@ button.icon-btn {
   align-items:center;
   gap:8px;
 }
-
 .inline input{ flex:1; }
 
 .actions{
@@ -436,7 +479,6 @@ button.icon-btn {
 
 .actions button{ flex:1; }
 
-/* Exceptions : boutons sur une même ligne */
 .actions button {
   width: auto;
   flex: 1;
@@ -495,10 +537,9 @@ button.icon-btn {
   border: 1px solid rgba(255,255,255,0.10);
 }
 
-/* danger */
+/* ================== DANGER ================== */
 .card.danger{
-  border: 1px solid rgba(255,120,90,0.6);
-
+  border: 1px solid var(--card-border-strong);
   box-shadow:
     0 0 0 1px rgba(255,120,90,0.25),
     0 12px 40px rgba(0,0,0,0.35),
@@ -527,28 +568,7 @@ button.icon-btn {
   .grid-3{ grid-template-columns: 1fr; }
 }
 
-.topbar{
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-}
-
-#openSettingsBtn.icon-btn{
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  border-radius: 14px;
-
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(6px);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-/* ===== Dialog (alert/confirm custom) ===== */
+/* ================== Dialog custom ================== */
 .dialog-card{
   position: relative;
   overflow: hidden;
@@ -580,7 +600,6 @@ button.icon-btn {
   line-height: 1.35;
 }
 
-/* petit “shake” si tu veux plus tard pour erreurs */
 @keyframes dialogPop {
   from { transform: translateY(14px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -595,11 +614,9 @@ button.icon-btn {
 .dialog-input-wrap.hidden{
   display:none;
 }
-#dialogInput{
-  width:100%;
-}
+#dialogInput{ width:100%; }
 
-/* Uniformisation textes */
+/* ================== Typo unify ================== */
 label, .label, .hint {
   font-size: 15px;
   font-weight: 700;
@@ -628,16 +645,14 @@ button {
   font-weight: 500;
 }
 
-/* Espacement vertical standard entre sections */
-.section-spacing {
-  margin-top: 20px;
-}
+.section-spacing { margin-top: 20px; }
 
 input + label {
   margin-top: 16px;
   display: block;
 }
 
+/* ================== Stats rows helper ================== */
 .stat-row{
   display:flex;
   justify-content:space-between;
@@ -647,9 +662,7 @@ input + label {
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
-.stat-row:last-child{
-  border-bottom: none;
-}
+.stat-row:last-child{ border-bottom: none; }
 
 .stat-value{
   text-align:right;
@@ -662,6 +675,7 @@ input + label {
   opacity: .95;
 }
 
+/* ================== LOADING (plein écran + anti banding) ================== */
 .loading{
   position: fixed;
   inset: 0;
@@ -671,7 +685,6 @@ input + label {
   justify-content:center;
   padding: 24px;
 
-  /* gradient smooth */
   background: radial-gradient(1200px 700px at 30% 10%,
     rgba(190,90,255,0.30),
     rgba(20,10,40,0.92) 55%,
@@ -696,7 +709,7 @@ input + label {
   padding: 22px 18px;
   border-radius: 20px;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(180,120,255,0.25);
+  border: 1px solid rgba(255,120,90,0.28);
   box-shadow: 0 18px 50px rgba(0,0,0,0.45);
   text-align:center;
   backdrop-filter: blur(12px);
@@ -718,4 +731,6 @@ input + label {
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* last safety */
 .hidden{ display:none !important; }

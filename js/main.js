@@ -1,5 +1,16 @@
+/* main.js — version complète (clean + stable)
+   ✅ Corrige les accolades / IIFE
+   ✅ Loading écran au refresh (plus de flash login)
+   ✅ Cloud sync sans casser l’UI
+   ✅ Temps global en XXhXXmn via #globalTimePretty
+   ⚠️ IMPORTANT: dans ton HTML, ajoute/assure:
+      <span id="globalTimePretty"></span>
+      et un écran <div id="loadingScreen" class="hidden">...</div>
+*/
+
 document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("appVersion").textContent = "V1 - 13/02/2026";
+  const v = document.getElementById("appVersion");
+  if (v) v.textContent = "V1 - 13/02/2026";
 });
 
 // ================== Storage helpers ==================
@@ -11,7 +22,6 @@ function todayLocal() {
 }
 
 function getISOWeekKey(date = todayLocal()) {
-  // ISO week number (approx) using local time
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
   const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
@@ -32,26 +42,22 @@ function defaultData() {
 
     meta: { updatedAt: Date.now() },
 
-    // goals configurable
     settings: {
       weekLoad: "normal",
       weekGoals: { busy: 150, normal: 250, light: 400 },
       monthGoal: 1000,
-
-      // Level curve (progressive)
       levelBase: 120,
       levelGrowth: 1.18
     },
 
-    // current period keys
     periods: {
       weekKey: getISOWeekKey(),
       monthKey: getMonthKey()
     },
 
     history: {
-      weeks: {},  // { "2026-W06": { xp, goal } }
-      months: {}  // { "2026-02": { xp, goal } }
+      weeks: {},
+      months: {}
     },
 
     global: {
@@ -60,13 +66,12 @@ function defaultData() {
       monthXp: 0
     },
 
-    worlds: {}, // id -> world
+    worlds: {},
     activeWorldId: null
   };
 }
 
 let settingsReturnTo = "home"; // "home" ou "world"
-
 
 function load() {
   const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
@@ -87,13 +92,13 @@ function load() {
   // reset week/month if keys changed
   const wk = getISOWeekKey();
   const mk = getMonthKey();
+
   if (data.periods.weekKey !== wk) {
     const oldKey = data.periods.weekKey;
     const oldXp = data.global.weekXp ?? 0;
     const oldGoal = (data.settings?.weekGoals?.[data.settings?.weekLoad] ?? 250);
-    if (oldKey) {
-      data.history.weeks[oldKey] = { xp: oldXp, goal: oldGoal };
-    }
+    if (oldKey) data.history.weeks[oldKey] = { xp: oldXp, goal: oldGoal };
+
     data.periods.weekKey = wk;
     data.global.weekXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.weekXp = 0; });
@@ -103,9 +108,8 @@ function load() {
     const oldKey = data.periods.monthKey;
     const oldXp = data.global.monthXp ?? 0;
     const oldGoal = Number(data.settings?.monthGoal) || 1000;
-    if (oldKey) {
-      data.history.months[oldKey] = { xp: oldXp, goal: oldGoal };
-    }
+    if (oldKey) data.history.months[oldKey] = { xp: oldXp, goal: oldGoal };
+
     data.periods.monthKey = mk;
     data.global.monthXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.monthXp = 0; });
@@ -114,28 +118,25 @@ function load() {
   return data;
 }
 
+let state = load();
+
 function save() {
   state.meta = state.meta || {};
   state.meta.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-  // si connectée : sauvegarde cloud (avec debounce)
-  scheduleCloudSave();
+  scheduleCloudSave(); // si connectée
 }
-
-let state = load();
 
 // ================== DOM ==================
 const el = (id) => document.getElementById(id);
 
 const loadingScreen = el("loadingScreen");
+const loginScreen = el("loginScreen");
 const onboardingScreen = el("onboardingScreen");
 const homeScreen = el("homeScreen");
 const worldScreen = el("worldScreen");
 const settingsScreen = el("settingsScreen");
-
-// connexion
-const loginScreen = el("loginScreen");
+const performanceScreen = el("performanceScreen");
 
 // onboarding
 const playerNameInput = el("playerNameInput");
@@ -205,7 +206,6 @@ const createMilestoneObjectiveBtn = el("createMilestoneObjectiveBtn");
 const createObjectiveBtn = el("createObjectiveBtn");
 
 // perf page
-const performanceScreen = el("performanceScreen");
 const backFromPerformanceBtn = el("backFromPerformanceBtn");
 const perfWeekList = el("perfWeekList");
 const perfMonthList = el("perfMonthList");
@@ -230,37 +230,16 @@ const popupEl = el("popup");
 // quick world settings (future)
 const worldQuickSettingsBtn = el("worldQuickSettingsBtn");
 
-function showLoading(on){
-  const l = document.getElementById("loadingScreen");
-  if (!l) return;
-  l.classList.toggle("hidden", !on);
-}
-
-function forceCloseAddWorldModal() {
-  const modal = document.getElementById("addWorldModal");
-  if (!modal) return;
-
-  // Cache de manière sûre, même si le CSS/class bug
-  modal.classList.add("hidden");
-  modal.style.display = "none";
-  modal.setAttribute("aria-hidden", "true");
-}
-
-function forceOpenAddWorldModal() {
-  const modal = document.getElementById("addWorldModal");
-  if (!modal) return;
-
-  modal.classList.remove("hidden");
-  modal.style.display = "flex"; // ou "block" selon ton CSS
-  modal.setAttribute("aria-hidden", "false");
-}
-
 // ================== UI helpers ==================
 function showScreen(which) {
-  [loadingScreen, loginScreen, onboardingScreen, homeScreen, worldScreen, settingsScreen, performanceScreen]
+  [
+    loadingScreen, loginScreen, onboardingScreen,
+    homeScreen, worldScreen, settingsScreen, performanceScreen
+  ]
     .filter(Boolean)
     .forEach(s => s.classList.add("hidden"));
-  which.classList.remove("hidden");
+
+  if (which) which.classList.remove("hidden");
 }
 
 function setActiveTab(containerSection, tabId) {
@@ -280,7 +259,8 @@ function showPopup(text) {
   }, 1600);
 }
 
-// ===== Custom Dialog (remplace alert/confirm) =====
+function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+
 // ===== Custom Dialog (remplace alert/confirm/prompt) =====
 function openDialog({
   title = "Info",
@@ -288,7 +268,7 @@ function openDialog({
   okText = "OK",
   cancelText = "Annuler",
   showCancel = true,
-  input = null // { value, placeholder, type }
+  input = null
 } = {}) {
   return new Promise((resolve) => {
     const modal = document.getElementById("dialogModal");
@@ -300,7 +280,6 @@ function openDialog({
     const inputWrap = document.getElementById("dialogInputWrap");
     const inputEl = document.getElementById("dialogInput");
 
-    // fallback sécurité (au cas où)
     if (!modal || !t || !m || !ok || !cancel) {
       if (input) {
         const v = prompt(message, input.value ?? "");
@@ -317,7 +296,6 @@ function openDialog({
     cancel.textContent = cancelText;
     cancel.classList.toggle("hidden", !showCancel);
 
-    // input mode (prompt)
     const isPrompt = !!input;
     if (inputWrap && inputEl) {
       inputWrap.classList.toggle("hidden", !isPrompt);
@@ -338,7 +316,6 @@ function openDialog({
       modal.classList.add("hidden");
       modal.style.display = "none";
       modal.setAttribute("aria-hidden", "true");
-
       resolve(result);
     }
 
@@ -371,11 +348,9 @@ function openDialog({
 function uiConfirm(message, title = "Confirmation") {
   return openDialog({ title, message, okText: "Confirmer", cancelText: "Annuler", showCancel: true });
 }
-
 function uiAlert(message, title = "Info") {
   return openDialog({ title, message, okText: "OK", showCancel: false });
 }
-
 function uiPrompt(message, {
   title = "Saisie",
   value = "",
@@ -394,25 +369,29 @@ function uiPrompt(message, {
   });
 }
 
-
-function clamp01(x){ return Math.max(0, Math.min(1, x)); }
-
-function getGlobalTotalMinutes() {
-  return Object.values(state.worlds || {})
-    .filter(w => w && w.active !== false)
-    .reduce((sum, w) => sum + (w?.stats?.timeTotal || 0), 0);
+// ================== Modals helpers ==================
+function forceCloseAddWorldModal() {
+  const modal = document.getElementById("addWorldModal");
+  if (!modal) return;
+  modal.classList.add("hidden");
+  modal.style.display = "none";
+  modal.setAttribute("aria-hidden", "true");
+}
+function forceOpenAddWorldModal() {
+  const modal = document.getElementById("addWorldModal");
+  if (!modal) return;
+  modal.classList.remove("hidden");
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
 }
 
-// ================== Levels (progressive curve) ==================
+// ================== Levels ==================
 function xpForNextLevel(level, base, growth) {
-  // xp needed to go from level -> level+1 (progressive)
   return Math.round(base * Math.pow(growth, Math.max(0, level - 1)));
 }
-
 function levelFromXp(totalXp, base, growth) {
   let level = 1;
   let remaining = totalXp;
-  // safety cap
   for (let i = 0; i < 500; i++) {
     const need = xpForNextLevel(level, base, growth);
     if (remaining < need) break;
@@ -421,7 +400,6 @@ function levelFromXp(totalXp, base, growth) {
   }
   return level;
 }
-
 function levelsGained(prevXp, newXp, base, growth) {
   const prev = levelFromXp(prevXp, base, growth);
   const now = levelFromXp(newXp, base, growth);
@@ -433,17 +411,19 @@ function getWeekGoal() {
   const load = state.settings.weekLoad || "normal";
   return state.settings.weekGoals?.[load] ?? 250;
 }
-
 function getMonthGoal() {
   return Number(state.settings.monthGoal) || 1000;
 }
-
 function calculateTimeXp(world, minutes) {
   const m = Number(world.rules.minutesBase) || 30;
   const x = Number(world.rules.xpBase) || 10;
   const raw = (minutes / m) * x;
-  // round to make it feel fair
   return Math.max(1, Math.round(raw));
+}
+function getGlobalTotalMinutes() {
+  return Object.values(state.worlds || {})
+    .filter(w => w)
+    .reduce((sum, w) => sum + (w?.stats?.timeTotal || 0), 0);
 }
 
 function addXp(worldId, xp, reasonText) {
@@ -453,7 +433,6 @@ function addXp(worldId, xp, reasonText) {
   const prevGlobalXp = state.global.totalXp;
   const prevWorldXp = w.stats.totalXp;
 
-  // apply
   state.global.totalXp += xp;
   state.global.weekXp += xp;
   state.global.monthXp += xp;
@@ -463,17 +442,20 @@ function addXp(worldId, xp, reasonText) {
   w.stats.monthXp += xp;
 
   save();
-
   showPopup(`${reasonText} +${xp} XP`);
 
-  // level up popups (global & world)
-  const { prev: gPrev, now: gNow } = levelsGained(prevGlobalXp, state.global.totalXp, state.settings.levelBase, state.settings.levelGrowth);
+  const { prev: gPrev, now: gNow } = levelsGained(
+    prevGlobalXp, state.global.totalXp,
+    state.settings.levelBase, state.settings.levelGrowth
+  );
   if (gNow > gPrev) showPopup(`🎉 Niveau global ${gNow} atteint !`);
 
-  const { prev: wPrev, now: wNow } = levelsGained(prevWorldXp, w.stats.totalXp, state.settings.levelBase, state.settings.levelGrowth);
+  const { prev: wPrev, now: wNow } = levelsGained(
+    prevWorldXp, w.stats.totalXp,
+    state.settings.levelBase, state.settings.levelGrowth
+  );
   if (wNow > wPrev) showPopup(`⭐ Niveau ${wNow} atteint dans ${w.icon} ${w.name} !`);
 
-  // rerender relevant
   renderHomeStats();
   renderWorldStats();
 }
@@ -482,19 +464,14 @@ function addXp(worldId, xp, reasonText) {
 function renderAfterAuth() {
   const user = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
 
-  // Pas connectée => écran login
   if (!user) {
     showScreen(loginScreen);
     return;
   }
-
-  // Connectée => pseudo obligatoire
   if (!state.playerName) {
     showScreen(onboardingScreen);
     return;
   }
-
-  // Connectée + pseudo => home
   showScreen(homeScreen);
   renderHome();
 }
@@ -505,13 +482,11 @@ function renderHome() {
 }
 
 function renderPerformanceScreen() {
-  // tabs
   const perfTabs = performanceScreen.querySelectorAll(".tab-btn");
   perfTabs.forEach(btn => {
     btn.onclick = () => setActiveTab(performanceScreen, btn.dataset.tab);
   });
   setActiveTab(performanceScreen, "perfWeek");
-
   renderPerformanceLists();
 }
 
@@ -562,52 +537,64 @@ function renderPerformanceLists() {
 }
 
 function renderHomeStats() {
-  playerNameEl.innerText = state.playerName || "";
-  globalXpEl.innerText = state.global.totalXp ?? 0;
-  globalLevelEl.innerText = levelFromXp(state.global.totalXp ?? 0, state.settings.levelBase, state.settings.levelGrowth);
+  if (playerNameEl) playerNameEl.innerText = state.playerName || "";
+  if (globalXpEl) globalXpEl.innerText = state.global.totalXp ?? 0;
+  if (globalLevelEl) globalLevelEl.innerText = levelFromXp(
+    state.global.totalXp ?? 0,
+    state.settings.levelBase,
+    state.settings.levelGrowth
+  );
+
+  // temps global -> XXhXXmn
   const totalMin = getGlobalTotalMinutes();
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  const pretty = `${String(h).padStart(2,"0")}h${String(m).padStart(2,"0")}mn`;
+  const hh = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  const pretty = `${String(hh).padStart(2,"0")}h${String(mm).padStart(2,"0")}mn`;
   const globalTimePrettyEl = document.getElementById("globalTimePretty");
   if (globalTimePrettyEl) globalTimePrettyEl.textContent = pretty;
 
   // week load buttons
-  const buttons = weekLoadPicker.querySelectorAll("button");
-  buttons.forEach(b => {
-    b.classList.toggle("active", b.dataset.load === state.settings.weekLoad);
-    b.onclick = async () => {
-      const nextLoad = b.dataset.load;
-      const current = state.settings.weekLoad;
+  if (weekLoadPicker) {
+    const buttons = weekLoadPicker.querySelectorAll("button");
+    buttons.forEach(b => {
+      b.classList.toggle("active", b.dataset.load === state.settings.weekLoad);
+      b.onclick = async () => {
+        const nextLoad = b.dataset.load;
+        const current = state.settings.weekLoad;
+        if (nextLoad === current) return;
 
-      if (nextLoad === current) return;
+        const label = nextLoad === "busy" ? "chargée" : nextLoad === "normal" ? "normale" : "légère";
+        const ok = await uiConfirm(`Confirmer semaine ${label} ?`, "Objectif hebdo");
+        if (!ok) return;
 
-      const label = nextLoad === "busy" ? "chargée" : nextLoad === "normal" ? "normale" : "légère";
-      const ok = await uiConfirm(`Confirmer semaine ${label} ?`, "Objectif hebdo");
-      if (!ok) return;
-
-      state.settings.weekLoad = nextLoad;
-      save();
-      renderHomeStats();
-    };
-  });
+        state.settings.weekLoad = nextLoad;
+        save();
+        renderHomeStats();
+      };
+    });
+  }
 
   const wg = getWeekGoal();
-  weekXpEl.innerText = state.global.weekXp ?? 0;
-  weekGoalEl.innerText = wg;
+  if (weekXpEl) weekXpEl.innerText = state.global.weekXp ?? 0;
+  if (weekGoalEl) weekGoalEl.innerText = wg;
   const wPct = clamp01((state.global.weekXp ?? 0) / wg);
-  weekProgressEl.style.width = `${Math.round(wPct*100)}%`;
-  weekProgressEl.innerText = `${Math.round(wPct*100)}%`;
+  if (weekProgressEl) {
+    weekProgressEl.style.width = `${Math.round(wPct*100)}%`;
+    weekProgressEl.innerText = `${Math.round(wPct*100)}%`;
+  }
 
   const mg = getMonthGoal();
-  monthXpEl.innerText = state.global.monthXp ?? 0;
-  monthGoalEl.innerText = mg;
+  if (monthXpEl) monthXpEl.innerText = state.global.monthXp ?? 0;
+  if (monthGoalEl) monthGoalEl.innerText = mg;
   const mPct = clamp01((state.global.monthXp ?? 0) / mg);
-  monthProgressEl.style.width = `${Math.round(mPct*100)}%`;
-  monthProgressEl.innerText = `${Math.round(mPct*100)}%`;
+  if (monthProgressEl) {
+    monthProgressEl.style.width = `${Math.round(mPct*100)}%`;
+    monthProgressEl.innerText = `${Math.round(mPct*100)}%`;
+  }
 }
 
 function renderWorlds() {
+  if (!worldsListEl) return;
   worldsListEl.innerHTML = "";
 
   const activeWorlds = Object.values(state.worlds).filter(w => w && w.active !== false);
@@ -629,29 +616,29 @@ function renderWorlds() {
 function renderWorldScreen() {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
+
   renderEntries();
+  if (worldHeaderTitle) worldHeaderTitle.innerText = `${w.icon} ${w.name}`;
 
-  worldHeaderTitle.innerText = `${w.icon} ${w.name}`;
-
-  // tabs
   const worldTabs = worldScreen.querySelectorAll(".tab-btn");
   worldTabs.forEach(btn => {
     btn.onclick = () => setActiveTab(worldScreen, btn.dataset.tab);
   });
   setActiveTab(worldScreen, "worldStats");
 
-  // input preview
-  timeMinutesInput.value = "";
-  timePreviewEl.innerText = "";
-  timeMinutesInput.oninput = () => {
-    const minutes = parseInt(timeMinutesInput.value, 10);
-    if (!Number.isFinite(minutes) || minutes <= 0) {
-      timePreviewEl.innerText = "";
-      return;
-    }
-    const xp = calculateTimeXp(w, minutes);
-    timePreviewEl.innerText = `≈ ${xp} XP gagnée(s)`;
-  };
+  if (timeMinutesInput && timePreviewEl) {
+    timeMinutesInput.value = "";
+    timePreviewEl.innerText = "";
+    timeMinutesInput.oninput = () => {
+      const minutes = parseInt(timeMinutesInput.value, 10);
+      if (!Number.isFinite(minutes) || minutes <= 0) {
+        timePreviewEl.innerText = "";
+        return;
+      }
+      const xp = calculateTimeXp(w, minutes);
+      timePreviewEl.innerText = `≈ ${xp} XP gagnée(s)`;
+    };
+  }
 
   renderWorldStats();
   renderObjectives();
@@ -661,20 +648,24 @@ function renderWorldStats() {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
-  worldLevelEl.innerText = levelFromXp(w.stats.totalXp, state.settings.levelBase, state.settings.levelGrowth);
-  worldWeekXpEl.innerText = w.stats.weekXp ?? 0;
-  worldTotalXpEl.innerText = w.stats.totalXp ?? 0;
-  worldRuleTextEl.innerText = `${w.rules.minutesBase} min = ${w.rules.xpBase} XP`;
-  worldTotalTimeEl.innerText = w.stats.timeTotal ?? 0;
+  if (worldLevelEl) worldLevelEl.innerText = levelFromXp(
+    w.stats.totalXp,
+    state.settings.levelBase,
+    state.settings.levelGrowth
+  );
+  if (worldWeekXpEl) worldWeekXpEl.innerText = w.stats.weekXp ?? 0;
+  if (worldTotalXpEl) worldTotalXpEl.innerText = w.stats.totalXp ?? 0;
+  if (worldRuleTextEl) worldRuleTextEl.innerText = `${w.rules.minutesBase} min = ${w.rules.xpBase} XP`;
+  if (worldTotalTimeEl) worldTotalTimeEl.innerText = w.stats.timeTotal ?? 0;
 }
 
 function renderObjectives() {
   const w = state.worlds[state.activeWorldId];
-  if (!w) return;
+  if (!w || !objectivesListEl) return;
 
   objectivesListEl.innerHTML = "";
-
   const list = Array.isArray(w.objectives) ? w.objectives : (w.objectives = []);
+
   if (list.length === 0) {
     objectivesListEl.innerHTML = `<p class="hint">Aucun objectif pour l’instant.</p>`;
     return;
@@ -706,23 +697,22 @@ function renderObjectives() {
       title = `${obj.name} (${obj.xp} / ${gained} XP)`;
       badge.innerText = obj.done ? "✅" : "⭐";
       xp = obj.xp;
-      
+
       canValidate = !obj.done;
       if (obj.done) label.style.textDecoration = "line-through";
-        } else if (obj.type === "milestone") {
+
+    } else if (obj.type === "milestone") {
       const steps = obj.steps || [];
       const doneSteps = steps.filter(s => s.done);
       const lastDone = doneSteps.length ? doneSteps[doneSteps.length - 1] : null;
       const next = steps.find(s => !s.done) || null;
 
       if (!next && !lastDone) {
-        // cas bizarre: pas de steps
         label.innerText = "(objectif palier vide)";
         badge.innerText = "📈";
         canValidate = false;
         xp = 0;
       } else if (!next && lastDone) {
-        // terminé
         const gained = doneSteps.reduce((s, st) => s + (st.xp || 0), 0);
         label.innerText = `${obj.prefix} ${lastDone.count} ${obj.suffix} ✅ (${0} / ${gained} XP)`;
         badge.innerText = "✅";
@@ -730,13 +720,11 @@ function renderObjectives() {
         xp = 0;
         label.style.textDecoration = "line-through";
       } else {
-        // actif (prochain palier)
         const gained = doneSteps.reduce((s, st) => s + (st.xp || 0), 0);
         const lastDoneHtml = lastDone
           ? `<div style="opacity:.65;text-decoration:line-through;">${obj.prefix} ${lastDone.count} ${obj.suffix} ✅</div>`
           : "";
         const nextHtml = `<div><strong>${obj.prefix} ${next.count} ${obj.suffix}</strong> <span class="hint">(${next.xp} / ${gained} XP)</span></div>`;
-
         label.innerHTML = `${lastDoneHtml}${nextHtml}`;
         badge.innerText = "📈";
         canValidate = true;
@@ -744,9 +732,7 @@ function renderObjectives() {
       }
     }
 
-    if (obj.type !== "milestone") {
-    label.innerText = title;
-    }
+    if (obj.type !== "milestone") label.innerText = title;
 
     const btn = document.createElement("button");
     btn.innerText = canValidate ? `${xp} XP` : "✓";
@@ -765,10 +751,9 @@ function formatDateTime(ts) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
-
 function canDeleteEntry(entry) {
   const ageMs = Date.now() - entry.createdAt;
-  return ageMs <= 24 * 60 * 60 * 1000; // 24h
+  return ageMs <= 24 * 60 * 60 * 1000;
 }
 
 function renderEntries() {
@@ -785,11 +770,13 @@ function renderEntries() {
 
   w.entries.forEach((entry) => {
     const row = document.createElement("div");
-    row.className = "objective-row"; // réutilise ton style flex
+    row.className = "objective-row";
 
     const label = document.createElement("div");
     label.className = "label";
-    label.innerHTML = `<strong>${formatDateTime(entry.createdAt)}</strong><br><span class="hint">Temps saisi : ${entry.minutes} min • +${entry.xp} XP</span>`;
+    label.innerHTML =
+      `<strong>${formatDateTime(entry.createdAt)}</strong><br>` +
+      `<span class="hint">Temps saisi : ${entry.minutes} min • +${entry.xp} XP</span>`;
 
     const del = document.createElement("button");
     del.className = "ghost";
@@ -825,13 +812,10 @@ async function deleteEntry(entryId) {
   const ok = await uiConfirm(`Supprimer cette saisie (${entry.minutes} min, -${entry.xp} XP) ?`, "Suppression");
   if (!ok) return;
 
-  // Retirer l'entry
   w.entries = w.entries.filter(e => e.id !== entryId);
 
-  // Retirer le temps
   w.stats.timeTotal = Math.max(0, (w.stats.timeTotal || 0) - entry.minutes);
 
-  // Retirer les XP : monde + global + périodes
   w.stats.totalXp = Math.max(0, (w.stats.totalXp || 0) - entry.xp);
   w.stats.weekXp = Math.max(0, (w.stats.weekXp || 0) - entry.xp);
   w.stats.monthXp = Math.max(0, (w.stats.monthXp || 0) - entry.xp);
@@ -841,10 +825,8 @@ async function deleteEntry(entryId) {
   state.global.monthXp = Math.max(0, (state.global.monthXp || 0) - entry.xp);
 
   save();
-
   showPopup(`🗑️ Saisie supprimée (-${entry.xp} XP)`);
 
-  // Refresh UI
   renderHomeStats();
   renderWorldStats();
   renderEntries();
@@ -857,36 +839,25 @@ function openWorld(worldId) {
   showScreen(worldScreen);
   renderWorldScreen();
 }
-
 function goHome() {
   showScreen(homeScreen);
   renderHome();
   state.activeWorldId = null;
   save();
-
 }
 
 // ================== Modals ==================
-openAddWorldBtn.onclick = forceOpenAddWorldModal;
-cancelWorldBtn.onclick = (e) => {
+if (openAddWorldBtn) openAddWorldBtn.onclick = forceOpenAddWorldModal;
+if (cancelWorldBtn) cancelWorldBtn.onclick = (e) => {
   e.preventDefault();
   forceCloseAddWorldModal();
 };
 
-
-function closeAddWorldModal() {
-  addWorldModal.classList.add("hidden");
-  worldNameInput.value = "";
-  worldIconInput.value = "";
-  minutesBaseInput.value = "";
-  xpBaseInput.value = "";
-}
-
-createWorldBtn.onclick = async () => {
-  const name = worldNameInput.value.trim();
-  const icon = worldIconInput.value.trim();
-  const minutes = parseInt(minutesBaseInput.value, 10);
-  const xp = parseInt(xpBaseInput.value, 10);
+if (createWorldBtn) createWorldBtn.onclick = async () => {
+  const name = (worldNameInput?.value || "").trim();
+  const icon = (worldIconInput?.value || "").trim();
+  const minutes = parseInt(minutesBaseInput?.value || "", 10);
+  const xp = parseInt(xpBaseInput?.value || "", 10);
 
   if (!name) return uiAlert("Nom du monde requis", "Créer un monde");
   if (!icon) return uiAlert("Icône requise (emoji)", "Créer un monde");
@@ -902,7 +873,8 @@ createWorldBtn.onclick = async () => {
     active: true,
     rules: { minutesBase: minutes, xpBase: xp },
     stats: { totalXp: 0, weekXp: 0, monthXp: 0, timeTotal: 0 },
-    objectives: []
+    objectives: [],
+    entries: []
   };
 
   save();
@@ -911,8 +883,8 @@ createWorldBtn.onclick = async () => {
 };
 
 // onboarding
-startBtn.onclick = async () => {
-  const name = (playerNameInput.value || "").trim();
+if (startBtn) startBtn.onclick = async () => {
+  const name = (playerNameInput?.value || "").trim();
   if (!name) return uiAlert("Entre un pseudo", "Bienvenue");
   state.playerName = name;
   save();
@@ -920,18 +892,18 @@ startBtn.onclick = async () => {
 };
 
 // back buttons
-openPerformanceBtn.onclick = () => {
+if (openPerformanceBtn) openPerformanceBtn.onclick = () => {
   showScreen(performanceScreen);
   renderPerformanceScreen();
 };
+if (backHomeBtn) backHomeBtn.onclick = () => goHome();
 
-backHomeBtn.onclick = () => goHome();
-openSettingsBtn.onclick = () => {
-    settingsReturnTo = "home";
-    showScreen(settingsScreen);
-    renderSettings();
+if (openSettingsBtn) openSettingsBtn.onclick = () => {
+  settingsReturnTo = "home";
+  showScreen(settingsScreen);
+  renderSettings();
 };
-backFromSettingsBtn.onclick = () => {
+if (backFromSettingsBtn) backFromSettingsBtn.onclick = () => {
   if (settingsReturnTo === "world" && state.activeWorldId) {
     showScreen(worldScreen);
     renderWorldScreen();
@@ -941,12 +913,11 @@ backFromSettingsBtn.onclick = () => {
   }
 };
 
-backFromPerformanceBtn.onclick = () => {
+if (backFromPerformanceBtn) backFromPerformanceBtn.onclick = () => {
   showScreen(homeScreen);
   renderHome();
 };
 
-// world quick settings (future hook)
 if (worldQuickSettingsBtn) {
   worldQuickSettingsBtn.onclick = () => {
     showPopup("⚙️ Paramètres monde : bientôt !");
@@ -954,54 +925,46 @@ if (worldQuickSettingsBtn) {
 }
 
 // ================== Time entry ==================
-validateTimeBtn.onclick = () => {
+if (validateTimeBtn) validateTimeBtn.onclick = () => {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
-  const minutes = parseInt(timeMinutesInput.value, 10);
+  const minutes = parseInt(timeMinutesInput?.value || "", 10);
   if (!Number.isFinite(minutes) || minutes <= 0) return uiAlert("Minutes invalides", "Saisie temps");
 
   const xp = calculateTimeXp(w, minutes);
 
-  // --- create entry (historique) ---
   if (!Array.isArray(w.entries)) w.entries = [];
-  const entry = {
-    id: "entry-" + Date.now(),
-    createdAt: Date.now(),
-    minutes,
-    xp
-  };
-  w.entries.unshift(entry); // ✅ plus récent en premier
+  const entry = { id: "entry-" + Date.now(), createdAt: Date.now(), minutes, xp };
+  w.entries.unshift(entry);
 
-  // apply time
   w.stats.timeTotal = (w.stats.timeTotal || 0) + minutes;
   save();
 
   addXp(w.id, xp, "⏱️ Temps validé !");
-
-  timeMinutesInput.value = "";
-  timePreviewEl.innerText = "";
+  if (timeMinutesInput) timeMinutesInput.value = "";
+  if (timePreviewEl) timePreviewEl.innerText = "";
 };
 
 // ================== Objectives create / validate ==================
 let draftMilestoneSteps = [];
 
 function refreshObjectiveTypeUI() {
-  const t = objectiveTypeSelect.value;
-  objectiveFieldsRepeatable.classList.toggle("hidden", t !== "repeatable");
-  objectiveFieldsUnique.classList.toggle("hidden", t !== "unique");
-  objectiveFieldsMilestone.classList.toggle("hidden", t !== "milestone");
-  createObjectiveBtn.classList.toggle("hidden", t === "milestone"); // milestone uses separate create button
+  const t = objectiveTypeSelect?.value || "repeatable";
+  if (objectiveFieldsRepeatable) objectiveFieldsRepeatable.classList.toggle("hidden", t !== "repeatable");
+  if (objectiveFieldsUnique) objectiveFieldsUnique.classList.toggle("hidden", t !== "unique");
+  if (objectiveFieldsMilestone) objectiveFieldsMilestone.classList.toggle("hidden", t !== "milestone");
+  if (createObjectiveBtn) createObjectiveBtn.classList.toggle("hidden", t === "milestone");
 }
-objectiveTypeSelect.onchange = refreshObjectiveTypeUI;
+if (objectiveTypeSelect) objectiveTypeSelect.onchange = refreshObjectiveTypeUI;
 refreshObjectiveTypeUI();
 
-addMilestoneStepBtn.onclick = async () => {
-  const count = parseInt(milestoneCountInput.value, 10);
-  const xp = parseInt(milestoneXpInput.value, 10);
+if (addMilestoneStepBtn) addMilestoneStepBtn.onclick = async () => {
+  const count = parseInt(milestoneCountInput?.value || "", 10);
+  const xp = parseInt(milestoneXpInput?.value || "", 10);
   if (!Number.isFinite(count) || count <= 0) return uiAlert("Palier invalide", "Objectifs");
   if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalide", "Objectifs");
-  // Empêche d'ajouter un palier <= au dernier palier (ordre obligatoire)
+
   const last = draftMilestoneSteps[draftMilestoneSteps.length - 1];
   if (last && count <= last.count) {
     return uiAlert(`Ajoute des paliers dans l’ordre (ex : ${last.count + 1}, puis plus grand).`, "Objectifs");
@@ -1009,13 +972,13 @@ addMilestoneStepBtn.onclick = async () => {
 
   draftMilestoneSteps.push({ count, xp, done: false });
 
-  milestoneCountInput.value = "";
-  milestoneXpInput.value = "";
-
+  if (milestoneCountInput) milestoneCountInput.value = "";
+  if (milestoneXpInput) milestoneXpInput.value = "";
   renderMilestonePreview();
 };
 
 function renderMilestonePreview() {
+  if (!milestoneStepsPreview) return;
   milestoneStepsPreview.innerHTML = "";
   draftMilestoneSteps.forEach(s => {
     const pill = document.createElement("div");
@@ -1025,12 +988,12 @@ function renderMilestonePreview() {
   });
 }
 
-createMilestoneObjectiveBtn.onclick = async () => {
+if (createMilestoneObjectiveBtn) createMilestoneObjectiveBtn.onclick = async () => {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
-  const prefix = milestonePrefixInput.value.trim();
-  const suffix = milestoneSuffixInput.value.trim();
+  const prefix = (milestonePrefixInput?.value || "").trim();
+  const suffix = (milestoneSuffixInput?.value || "").trim();
   if (!prefix) return uiAlert("Texte 1 requis (ex : Lire)", "Objectifs");
   if (!suffix) return uiAlert("Texte 2 requis (ex : livres)", "Objectifs");
   if (draftMilestoneSteps.length === 0) return uiAlert("Ajoute au moins un palier", "Objectifs");
@@ -1045,9 +1008,8 @@ createMilestoneObjectiveBtn.onclick = async () => {
     steps: draftMilestoneSteps.map(s => ({ ...s }))
   });
 
-  // reset UI
-  milestonePrefixInput.value = "";
-  milestoneSuffixInput.value = "";
+  if (milestonePrefixInput) milestonePrefixInput.value = "";
+  if (milestoneSuffixInput) milestoneSuffixInput.value = "";
   draftMilestoneSteps = [];
   renderMilestonePreview();
 
@@ -1056,35 +1018,33 @@ createMilestoneObjectiveBtn.onclick = async () => {
   renderObjectives();
 };
 
-createObjectiveBtn.onclick = async () => {
+if (createObjectiveBtn) createObjectiveBtn.onclick = async () => {
   const w = state.worlds[state.activeWorldId];
   if (!w) return;
 
-  const t = objectiveTypeSelect.value;
+  const t = objectiveTypeSelect?.value || "repeatable";
   const id = "obj-" + Date.now();
 
   if (t === "repeatable") {
-    const name = objNameInput.value.trim();
-    const xp = parseInt(objXpInput.value, 10);
-    if (!name) return uiAlert("Nom requis");
-    if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
+    const name = (objNameInput?.value || "").trim();
+    const xp = parseInt(objXpInput?.value || "", 10);
+    if (!name) return uiAlert("Nom requis", "Objectifs");
+    if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalide", "Objectifs");
 
     w.objectives.push({ id, type: "repeatable", name, xp, doneCount: 0 });
-
-    objNameInput.value = "";
-    objXpInput.value = "";
+    if (objNameInput) objNameInput.value = "";
+    if (objXpInput) objXpInput.value = "";
   }
 
   if (t === "unique") {
-    const name = objNameUniqueInput.value.trim();
-    const xp = parseInt(objXpUniqueInput.value, 10);
-    if (!name) return uiAlert("Nom requis");
-    if (!Number.isFinite(xp) || xp <= 0) return alert("XP invalide");
+    const name = (objNameUniqueInput?.value || "").trim();
+    const xp = parseInt(objXpUniqueInput?.value || "", 10);
+    if (!name) return uiAlert("Nom requis", "Objectifs");
+    if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalide", "Objectifs");
 
     w.objectives.push({ id, type: "unique", name, xp, done: false });
-
-    objNameUniqueInput.value = "";
-    objXpUniqueInput.value = "";
+    if (objNameUniqueInput) objNameUniqueInput.value = "";
+    if (objXpUniqueInput) objXpUniqueInput.value = "";
   }
 
   save();
@@ -1101,7 +1061,6 @@ async function validateObjective(objectiveId) {
 
   const ok = await uiConfirm("Valider cet objectif ?", "Objectifs");
   if (!ok) return;
-
 
   if (obj.type === "repeatable") {
     obj.doneCount = (obj.doneCount || 0) + 1;
@@ -1133,14 +1092,13 @@ async function validateObjective(objectiveId) {
 
 // ================== Settings ==================
 function renderSettings() {
-  // fill inputs
-  monthGoalInput.value = getMonthGoal();
-  weekGoalBusyInput.value = state.settings.weekGoals.busy;
-  weekGoalNormalInput.value = state.settings.weekGoals.normal;
-  weekGoalLightInput.value = state.settings.weekGoals.light;
+  if (monthGoalInput) monthGoalInput.value = getMonthGoal();
+  if (weekGoalBusyInput) weekGoalBusyInput.value = state.settings.weekGoals.busy;
+  if (weekGoalNormalInput) weekGoalNormalInput.value = state.settings.weekGoals.normal;
+  if (weekGoalLightInput) weekGoalLightInput.value = state.settings.weekGoals.light;
 
   renderManageWorlds();
-  // Compte: pseudo + email
+
   const u = (window.firebase && firebase.auth) ? firebase.auth().currentUser : null;
   const pseudoLine = document.getElementById("accountPseudoLine");
   const emailLine = document.getElementById("accountEmailLine");
@@ -1158,15 +1116,9 @@ function renderManageWorlds() {
   const activeWorlds = worlds.filter(w => w && w.active !== false);
   const archivedWorlds = worlds.filter(w => w && w.active === false);
 
-  // --- empty states
-  if (activeWorlds.length === 0) {
-    manageWorldsActiveList.innerHTML = `<p class="hint">Aucun monde actif pour le moment.</p>`;
-  }
-  if (archivedWorlds.length === 0) {
-    manageWorldsArchivedList.innerHTML = `<p class="hint">Aucun monde archivé pour le moment.</p>`;
-  }
+  if (activeWorlds.length === 0) manageWorldsActiveList.innerHTML = `<p class="hint">Aucun monde actif pour le moment.</p>`;
+  if (archivedWorlds.length === 0) manageWorldsArchivedList.innerHTML = `<p class="hint">Aucun monde archivé pour le moment.</p>`;
 
-  // --- Actifs: Supprimer (= archiver) + Règle XP
   activeWorlds.forEach(w => {
     const row = document.createElement("div");
     row.className = "objective-row";
@@ -1185,8 +1137,6 @@ function renderManageWorlds() {
       if (!ok) return;
 
       w.active = false;
-
-      // si on archive le monde ouvert, on sort
       if (state.activeWorldId === w.id) state.activeWorldId = null;
 
       save();
@@ -1237,7 +1187,6 @@ function renderManageWorlds() {
     manageWorldsActiveList.appendChild(row);
   });
 
-  // --- Archivés: Restaurer
   archivedWorlds.forEach(w => {
     const row = document.createElement("div");
     row.className = "objective-row";
@@ -1266,15 +1215,14 @@ function renderManageWorlds() {
   });
 }
 
-saveGoalsBtn.onclick = () => {
-  const mg = parseInt(monthGoalInput.value, 10);
-  const b = parseInt(weekGoalBusyInput.value, 10);
-  const n = parseInt(weekGoalNormalInput.value, 10);
-  const l = parseInt(weekGoalLightInput.value, 10);
+if (saveGoalsBtn) saveGoalsBtn.onclick = () => {
+  const mg = parseInt(monthGoalInput?.value || "", 10);
+  const b = parseInt(weekGoalBusyInput?.value || "", 10);
+  const n = parseInt(weekGoalNormalInput?.value || "", 10);
+  const l = parseInt(weekGoalLightInput?.value || "", 10);
 
   if (![mg, b, n, l].every(v => Number.isFinite(v) && v > 0)) {
     return uiAlert("Valeurs invalides", "Paramètres");
-    return;
   }
 
   state.settings.monthGoal = mg;
@@ -1295,11 +1243,9 @@ if (resetGameBtn) resetGameBtn.onclick = async () => {
   const ok2 = await uiConfirm("Dernière confirmation : tout sera perdu. Continuer ?", "Réinitialisation");
   if (!ok2) return;
 
-  // 1) reset local
   state = defaultData();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-  // 2) reset cloud (supprime la sauvegarde)
   try {
     const db = firebase.firestore();
     await db.collection("users").doc(user.uid).collection("app").doc("save").delete();
@@ -1309,20 +1255,15 @@ if (resetGameBtn) resetGameBtn.onclick = async () => {
   }
 
   showPopup("🧹 Jeu réinitialisé");
-  renderAfterAuth(); // => onboarding (pseudo)
+  renderAfterAuth();
 };
 
+// ================== Init + patches ==================
 
-// ================== Tab init (home/world) ==================
-(function initTabs() {
-  // Home tabs bound in renderHome
-  // World tabs bound in renderWorldScreen
-})();
-
-// ================== Init ==================
+// Init: afficher loading direct (évite flash login)
 showScreen(loadingScreen);
 
-// === PATCH: fermeture du modal "Créer un monde" (inratable) ===
+// fermeture modal (bouton annuler)
 document.addEventListener("DOMContentLoaded", () => {
   const cancelBtn = document.getElementById("cancelWorldBtn");
   if (cancelBtn) {
@@ -1333,42 +1274,40 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// fermeture modal (clic overlay)
 document.addEventListener("click", (e) => {
   const modal = document.getElementById("addWorldModal");
   if (!modal) return;
-
-  // si clic sur le fond du modal (overlay), fermer
-  if (e.target === modal) {
-    forceCloseAddWorldModal();
-  }
+  if (e.target === modal) forceCloseAddWorldModal();
 });
 
+// service worker update -> reload
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.addEventListener("controllerchange", () => {
     window.location.reload();
   });
 }
 
+// ================== Cloud globals ==================
 let cloudAuthUser = null;
 let cloudDb = null;
 let cloudSaveTimer = null;
 
 // ================== FIREBASE AUTH (Email/MDP) ==================
 (function setupFirebaseAuth(){
-  // UI (écran login)
   const authStatus = document.getElementById("authStatus");
   const authEmail = document.getElementById("authEmail");
   const authPassword = document.getElementById("authPassword");
   const btnLogin = document.getElementById("btnLogin");
   const btnSignup = document.getElementById("btnSignup");
 
-  // UI (paramètres)
   const btnLogout = document.getElementById("btnLogout");
-  const accountEmailLine = document.getElementById("accountEmailLine"); // optionnel
+  const accountEmailLine = document.getElementById("accountEmailLine");
 
   if (!window.firebase || !firebase.auth) {
     console.warn("Firebase Auth non chargé.");
     if (authStatus) authStatus.textContent = "Firebase non chargé";
+    showScreen(loginScreen);
     return;
   }
 
@@ -1382,12 +1321,11 @@ let cloudSaveTimer = null;
     try {
       await auth.createUserWithEmailAndPassword(email, pass);
 
-      // ✅ nouveau compte => nouveau départ local
       state = defaultData();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
       showPopup("✅ Compte créé");
-      renderAfterAuth(); // => onboarding (pseudo)
+      renderAfterAuth();
     } catch (e) {
       await uiAlert(e.message, "Connexion");
     }
@@ -1401,7 +1339,6 @@ let cloudSaveTimer = null;
     try {
       await auth.signInWithEmailAndPassword(email, pass);
       showPopup("✅ Connectée");
-      // l'affichage + sync se fait dans onAuthStateChanged
     } catch (e) {
       await uiAlert(e.message, "Connexion");
     }
@@ -1411,47 +1348,46 @@ let cloudSaveTimer = null;
     try {
       await auth.signOut();
       showPopup("👋 Déconnectée");
-      // onAuthStateChanged -> retour loginScreen
     } catch (e) {
       await uiAlert(e.message, "Connexion");
     }
   }
 
-  // events
   if (btnLogin) btnLogin.onclick = login;
   if (btnSignup) btnSignup.onclick = signup;
   if (btnLogout) btnLogout.onclick = logout;
 
-  // ✅ UN SEUL onAuthStateChanged (source de vérité)
-auth.onAuthStateChanged(async (user) => {
-  showLoading(true);
+  // ✅ source de vérité au refresh
+  auth.onAuthStateChanged(async (user) => {
+    cloudAuthUser = user || null;
 
-  cloudAuthUser = user || null;
+    // Loading visible tant qu’on n’a pas décidé
+    showScreen(loadingScreen);
 
-  if (authStatus) authStatus.textContent = user ? `Connectée : ${user.email}` : "Non connectée";
-  if (accountEmailLine) accountEmailLine.textContent = user ? `Connectée : ${user.email}` : "";
+    if (authStatus) authStatus.textContent = user ? `Connectée : ${user.email}` : "Non connectée";
+    if (accountEmailLine) accountEmailLine.textContent = user ? `${user.email}` : "";
 
-  // Pas connectée -> écran login
-  if (!user) {
-    renderAfterAuth();      // => loginScreen
-    showLoading(false);     // ✅ IMPORTANT
-    return;
-  }
+    if (!user) {
+      renderAfterAuth(); // -> login
+      return;
+    }
 
-  // Connectée -> sync cloud puis affichage
-  try {
-    await pullCloudAndMerge();
-  } catch (e) {
-    console.error(e);
-    showPopup("⚠️ Sync cloud impossible");
-  }
+    try {
+      await pullCloudAndMerge(); // peut remplacer state
+    } catch (e) {
+      console.error(e);
+      showPopup("⚠️ Sync cloud impossible");
+    }
 
-  renderAfterAuth();
-  showLoading(false);       // ✅ IMPORTANT
-});
+    renderAfterAuth(); // -> home/onboarding
+    // re-render pour être sûre que tout est à jour
+    renderHome();
+    renderHomeStats();
+    renderWorlds();
+  });
+})();
 
 // ================== FIRESTORE CLOUD SAVE ==================
-// doc: users/{uid}/app/save
 function cloudSaveRef(uid) {
   return cloudDb.collection("users").doc(uid).collection("app").doc("save");
 }
@@ -1463,7 +1399,6 @@ function initCloudDbIfReady() {
 }
 
 function scheduleCloudSave() {
-  // pas connectée -> rien
   if (!cloudAuthUser) return;
   if (!initCloudDbIfReady()) return;
 
@@ -1499,7 +1434,6 @@ async function pullCloudAndMerge() {
   const ref = cloudSaveRef(uid);
   const snap = await ref.get();
 
-  // Si rien en cloud : on pousse le local (première connexion)
   if (!snap.exists) {
     await pushCloudSave();
     showPopup("☁️ Sauvegarde cloud créée");
@@ -1511,14 +1445,11 @@ async function pullCloudAndMerge() {
   const cloudUpdatedAt = cloud.updatedAt || 0;
   const localUpdatedAt = state?.meta?.updatedAt || 0;
 
-  // règle simple : la plus récente gagne
   if (cloudState && cloudUpdatedAt > localUpdatedAt) {
     state = cloudState;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     showPopup("☁️ Données récupérées");
-    renderAfterAuth();
   } else {
-    // local plus récent -> push
     await pushCloudSave();
     showPopup("☁️ Données synchronisées");
   }
