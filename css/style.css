@@ -221,14 +221,10 @@ input:focus, select:focus {
 
 /* banner */
 .app-banner {
-  width: 85%;
-  max-width: 420px;
+  width: 100%;
   height: auto;
   display: block;
-  margin: 10px auto 25px auto;
   border-radius: 16px;
-
-  /* NEW: léger glow pour coller au style */
   box-shadow: 0 16px 40px rgba(0,0,0,0.35);
 }
 
@@ -508,9 +504,12 @@ button.icon-btn {
 
 #openSettingsBtn.icon-btn{
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 2;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+
+  width: 42px;
+  height: 42px;
 
   /* look bouton discret */
   background: rgba(255,255,255,0.18);
@@ -519,6 +518,9 @@ button.icon-btn {
   padding: 8px 10px;
   cursor: pointer;
   backdrop-filter: blur(6px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 #openSettingsBtn.icon-btn:active{
