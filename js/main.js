@@ -10,7 +10,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
-  if (v) v.textContent = "V1 - 13/02/2026";
+  if (v) v.textContent = "V1 - 16/02/2026";
 });
 
 // ================== Storage helpers ==================
@@ -656,7 +656,13 @@ function renderWorldStats() {
   if (worldWeekXpEl) worldWeekXpEl.innerText = w.stats.weekXp ?? 0;
   if (worldTotalXpEl) worldTotalXpEl.innerText = w.stats.totalXp ?? 0;
   if (worldRuleTextEl) worldRuleTextEl.innerText = `${w.rules.minutesBase} min = ${w.rules.xpBase} XP`;
-  if (worldTotalTimeEl) worldTotalTimeEl.innerText = w.stats.timeTotal ?? 0;
+  if (worldTotalTimeEl) {
+    const totalMin = w.stats.timeTotal ?? 0;
+    const hh = Math.floor(totalMin / 60);
+    const mm = totalMin % 60;
+    worldTotalTimeEl.innerText =
+      `${String(hh).padStart(2, "0")}h${String(mm).padStart(2, "0")}mn`;
+  }
 }
 
 function renderObjectives() {
@@ -920,7 +926,9 @@ if (backFromPerformanceBtn) backFromPerformanceBtn.onclick = () => {
 
 if (worldQuickSettingsBtn) {
   worldQuickSettingsBtn.onclick = () => {
-    showPopup("⚙️ Paramètres monde : bientôt !");
+    settingsReturnTo = "world";
+    showScreen(settingsScreen);
+    renderSettings();
   };
 }
 

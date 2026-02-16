@@ -69,6 +69,9 @@ body{
   padding: 16px;
   max-width: 420px;
   margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 /* ================== TITRES ================== */
@@ -185,20 +188,21 @@ input:focus, select:focus {
 
 /* ================== CARDS ================== */
 .card {
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(14px);
   border-radius: 20px;
   padding: 20px;
 
-  /* ✅ Bordure orange partout */
-  border: 1px solid var(--card-border);
+  border: 1px solid rgba(255,255,255,0.10);
 
   box-shadow:
-    0 0 0 1px rgba(255,120,90,0.18),
-    0 12px 40px rgba(0,0,0,0.35),
-    0 0 25px var(--card-glow);
+    0 12px 40px rgba(0,0,0,0.45);
 
-  transition: all 0.25s ease;
+  transition: transform 0.2s ease;
+}
+
+.card:hover{
+  transform: translateY(-2px);
 }
 
 .card:hover{
@@ -291,7 +295,7 @@ input:focus, select:focus {
 
 /* ================== BARRES DE PROGRESSION ================== */
 .progress-bar{
-  height: 22px;
+  height: 24px;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.10);
