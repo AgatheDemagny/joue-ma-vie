@@ -433,8 +433,16 @@ function forceCloseAddWorldModal() {
   const modal = document.getElementById("addWorldModal");
   if (!modal) return;
   modal.classList.add("hidden");
-  modal.style.display = "none";
-  modal.setAttribute("aria-hidden", "true");
+  if (minutesBaseInput && (minutesBaseInput.value === "" || minutesBaseInput.value == null)) {
+    minutesBaseInput.value = "1";
+  }
+  if (xpBaseInput && (xpBaseInput.value === "" || xpBaseInput.value == null)) {
+    xpBaseInput.value = "1";
+  }
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+  if (minutesBaseInput) minutesBaseInput.value = "1";
+  if (xpBaseInput) xpBaseInput.value = "1";
 }
 function forceOpenAddWorldModal() {
   const modal = document.getElementById("addWorldModal");
@@ -1412,13 +1420,31 @@ if (cancelWorldBtn) cancelWorldBtn.onclick = (e) => {
 if (createWorldBtn) createWorldBtn.onclick = async () => {
   const name = (worldNameInput?.value || "").trim();
   const icon = (worldIconInput?.value || "").trim();
-  const minutes = parseInt(minutesBaseInput?.value || "", 10);
-  const xp = parseInt(xpBaseInput?.value || "", 10);
+
+  const minutesRaw = (minutesBaseInput?.value || "").trim();
+  const xpRaw = (xpBaseInput?.value || "").trim();
 
   if (!name) return uiAlert("Nom du monde requis", "Créer un monde");
   if (!icon) return uiAlert("Icône requise (emoji)", "Créer un monde");
-  if (!Number.isFinite(minutes) || minutes <= 0) return uiAlert("Minutes invalides", "Créer un monde");
-  if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalides", "Créer un monde");
+
+  // ✅ Cas 1 : les 2 vides -> défaut 1 / 1
+  let minutes, xp;
+  if (minutesRaw === "" && xpRaw === "") {
+    minutes = 1;
+    xp = 1;
+  } else {
+    // ✅ Cas 2 : un seul rempli -> erreur
+    if (minutesRaw === "" || xpRaw === "") {
+      return uiAlert("Si tu modifies la règle XP, il faut renseigner à la fois Minutes ET XP.", "Créer un monde");
+    }
+
+    // ✅ Cas 3 : les 2 remplis -> ok
+    minutes = parseInt(minutesRaw, 10);
+    xp = parseInt(xpRaw, 10);
+
+    if (!Number.isFinite(minutes) || minutes <= 0) return uiAlert("Minutes invalides", "Créer un monde");
+    if (!Number.isFinite(xp) || xp <= 0) return uiAlert("XP invalides", "Créer un monde");
+  }
 
   const id = "world-" + Date.now();
 
