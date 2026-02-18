@@ -117,6 +117,8 @@ function load() {
   const wk = getISOWeekKey();
   const mk = getMonthKey();
 
+  data.celebrations = data.celebrations || { weekKey: null, monthKey: null };
+
   if (data.periods.weekKey !== wk) {
     const oldKey = data.periods.weekKey;
     const oldXp = data.global.weekXp ?? 0;
@@ -126,6 +128,7 @@ function load() {
     data.periods.weekKey = wk;
     data.global.weekXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.weekXp = 0; });
+    data.celebrations.weekKey = null;
   }
 
   if (data.periods.monthKey !== mk) {
@@ -137,6 +140,7 @@ function load() {
     data.periods.monthKey = mk;
     data.global.monthXp = 0;
     Object.values(data.worlds).forEach(w => { if (w?.stats) w.stats.monthXp = 0; });
+    data.celebrations.monthKey = null;
   }
 
   return data;
@@ -428,6 +432,37 @@ function uiPrompt(message, {
   });
 }
 
+function openCelebrationModal({ title, msg, emoji = "🎉" }){
+  const modal = document.getElementById("celebrationModal");
+  const t = document.getElementById("celebrationTitle");
+  const m = document.getElementById("celebrationMsg");
+  const e = document.getElementById("celebrationEmoji");
+  const ok = document.getElementById("celebrationOkBtn");
+
+  if (!modal || !t || !m || !ok || !e) return;
+
+  t.textContent = title;
+  m.textContent = msg;
+  e.textContent = emoji;
+
+  function close(){
+    ok.removeEventListener("click", close);
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  ok.addEventListener("click", close);
+
+  modal.classList.remove("hidden");
+  modal.style.display = "flex";
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function ensureCelebrationsState(){
+  if (!state.celebrations) state.celebrations = { weekKey: null, monthKey: null };
+}
+
 // ================== Modals helpers ==================
 function forceCloseAddWorldModal() {
   const modal = document.getElementById("addWorldModal");
@@ -708,7 +743,6 @@ function renderHomeStats() {
     state.settings.levelGrowth
   );
 
-  // temps global -> XXhXXmn
   const totalMin = getGlobalTotalMinutes();
   const hh = Math.floor(totalMin / 60);
   const mm = totalMin % 60;
@@ -716,7 +750,6 @@ function renderHomeStats() {
   const globalTimePrettyEl = document.getElementById("globalTimePretty");
   if (globalTimePrettyEl) globalTimePrettyEl.textContent = pretty;
 
-  // week load buttons
   if (weekLoadPicker) {
     const buttons = weekLoadPicker.querySelectorAll("button");
     buttons.forEach(b => {
@@ -754,7 +787,31 @@ function renderHomeStats() {
     monthProgressEl.style.width = `${Math.round(mPct*100)}%`;
     monthProgressEl.innerText = `${Math.round(mPct*100)}%`;
   }
+
+  // ✅ ICI : AJOUTE LE BLOC 3C (tout à la fin)
+  ensureCelebrationsState();
+
+  if (wPct >= 1 && state.celebrations.weekKey !== state.periods.weekKey) {
+    state.celebrations.weekKey = state.periods.weekKey;
+    save();
+    openCelebrationModal({
+      title: "🏁 Objectif hebdomadaire atteint !",
+      msg: "Félicitations ✨ Tu as complété ton objectif de la semaine !",
+      emoji: "🎉"
+    });
+  }
+
+  if (mPct >= 1 && state.celebrations.monthKey !== state.periods.monthKey) {
+    state.celebrations.monthKey = state.periods.monthKey;
+    save();
+    openCelebrationModal({
+      title: "🏆 Objectif mensuel atteint !",
+      msg: "Incroyable 💜 Tu as complété ton objectif du mois !",
+      emoji: "🏆"
+    });
+  }
 }
+
 
 function renderWorlds() {
   if (!worldsListEl) return;
