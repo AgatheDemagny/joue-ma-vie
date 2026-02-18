@@ -1005,37 +1005,35 @@ function renderInProgressRow(obj){
   const title = document.createElement("div");
   title.className = "obj-title";
 
+  // ✅ on crée xpLine AVANT de l'utiliser
+  const xpLine = document.createElement("div");
+  xpLine.className = "obj-meta";
+
   const icon = getObjectiveIcon(obj.type);
 
   if (obj.type === "unique") {
     title.textContent = `${icon} ${(obj.name || "Objectif").trim()}`;
-    const xp = Number(obj.xp || 0);
-    xpLine.textContent = `${xp} XP`;
+    xpLine.textContent = `${Number(obj.xp || 0)} XP`;
   }
 
   if (obj.type === "repeatable") {
-  title.textContent = `${icon} ${(obj.name || "Objectif").trim()}`;
-  const xp = Number(obj.xp || 0);
-  xpLine.textContent = `${xp} XP`;
+    title.textContent = `${icon} ${(obj.name || "Objectif").trim()}`;
+    xpLine.textContent = `${Number(obj.xp || 0)} XP`;
   }
 
   if (obj.type === "milestone") {
-  const next = getMilestoneNextStep(obj);
-  const xp = next ? Number(next.xp || 0) : 0;
-  title.textContent = `${icon} ${(obj.prefix || "").trim()} … ${(obj.suffix || "").trim()}`;
-  xpLine.textContent = `${xp} XP`;
+    const next = getMilestoneNextStep(obj);
+    const xp = next ? Number(next.xp || 0) : 0;
+    title.textContent = `${icon} ${(obj.prefix || "").trim()} … ${(obj.suffix || "").trim()}`;
+    xpLine.textContent = `${xp} XP`;
   }
 
   left.appendChild(title);
-
-  const xpLine = document.createElement("div");
-  xpLine.className = "obj-meta";
   left.appendChild(xpLine);
 
   const actions = document.createElement("div");
   actions.className = "obj-actions";
 
-  // ✅ icônes sans gros carré : on garde juste un bouton minimal
   const validateBtn = document.createElement("button");
   validateBtn.className = "obj-icon";
   validateBtn.type = "button";
@@ -1057,6 +1055,7 @@ function renderInProgressRow(obj){
   row.appendChild(actions);
   return row;
 }
+
 
 function renderArchivedRow(item){
   const row = document.createElement("div");
