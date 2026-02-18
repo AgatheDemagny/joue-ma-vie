@@ -10,7 +10,7 @@
 
 document.addEventListener("DOMContentLoaded", () => {
   const v = document.getElementById("appVersion");
-  if (v) v.textContent = "V1 - 17/02/2026";
+  if (v) v.textContent = "V1 - 18/02/2026";
 });
 
 // ================== Storage helpers ==================
@@ -74,11 +74,6 @@ function defaultData() {
 let settingsReturnTo = "home"; // "home" ou "world"
 let editingObjectiveId = null; // null = ajout, sinon = modification
 
-function formatXp(xp){
-  const n = Number(xp || 0);
-  return `${n} XP`;
-}
-
 function resetObjectiveForm(){
   editingObjectiveId = null;
   const btn = document.getElementById("createObjectiveBtn");
@@ -99,7 +94,7 @@ function resetObjectiveForm(){
 
   // remettre le type par défaut + champs visibles cohérents
   if (objectiveTypeSelect) objectiveTypeSelect.value = "repeatable";
-  showObjectiveFieldsForType("repeatable");
+  refreshObjectiveTypeUI();
 }
 
 function load() {
@@ -1543,10 +1538,10 @@ if (createObjectiveBtn) createObjectiveBtn.onclick = async () => {
     w.objectives.push(obj);
   }
 
-  // IMPORTANT : si l'utilisateur change le type pendant l'édition
-  obj.type = t;
+  const effectiveType = isEditing ? obj.type : t;
+  if (!isEditing) obj.type = t;
 
-  if (t === "repeatable") {
+  if (effectiveType  === "repeatable") {
     const name = (objNameInput?.value || "").trim();
     const xp = parseInt(objXpInput?.value || "", 10);
     if (!name) return uiAlert("Nom requis", "Objectifs");
@@ -1561,7 +1556,7 @@ if (createObjectiveBtn) createObjectiveBtn.onclick = async () => {
     if (objXpInput) objXpInput.value = "";
   }
 
-  if (t === "unique") {
+  if (effectiveType  === "unique") {
     const name = (objNameUniqueInput?.value || "").trim();
     const xp = parseInt(objXpUniqueInput?.value || "", 10);
     if (!name) return uiAlert("Nom requis", "Objectifs");
@@ -1607,7 +1602,7 @@ async function validateObjective(objectiveId) {
   return;
 }
 
-if (obj.type === "unique") {
+else if (obj.type === "unique") {
   if (obj.done) return;
   obj.done = true;
   obj.doneAt = Date.now();
@@ -1618,7 +1613,7 @@ if (obj.type === "unique") {
   return;
 }
 
-if (obj.type === "milestone") {
+else if (obj.type === "milestone") {
   if (!Array.isArray(obj.steps)) obj.steps = [];
   obj.progress = Number(obj.progress || 0);
   obj.progressEvents = Array.isArray(obj.progressEvents) ? obj.progressEvents : [];

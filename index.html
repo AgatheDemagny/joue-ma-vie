@@ -109,7 +109,7 @@
           <button class="btn-block" id="openAddWorldBtn">🌄 Ajouter un monde</button>
         </div>
 
-        <div id="addWorldModal" class="modal hidden" role="dialog" aria-modal="true">
+        <div id="addWorldModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
           <div class="modal-content card">
             <h3>Créer un monde</h3>
 
@@ -172,10 +172,10 @@
           <p class="hint" id="timePreview"></p>
         </div>
 
-      <div class="card">
-        <h3>Historique des saisies</h3>
-        <div id="entriesList"></div>
-        <p class="hint">Suppression possible uniquement pendant 24h.</p>
+        <div class="card">
+          <h3>Historique des saisies</h3>
+          <div id="entriesList"></div>
+          <p class="hint">Suppression possible uniquement pendant 24h.</p>
         </div>
       </div>
       <div id="worldObjectives" class="tab-panel hidden">
@@ -275,7 +275,9 @@
 
               <button id="editSaveMilestoneBtn">Enregistrer l’objectif palier</button>
             </div>
-
+            <button id="editDeleteObjectiveBtn" class="danger-btn btn-block" type="button">
+              🗑️ Supprimer l’objectif
+            </button>
             <div class="actions">
               <button id="editSaveObjectiveBtn">Enregistrer</button>
               <button id="editCancelObjectiveBtn" class="ghost" type="button">Annuler</button>
@@ -374,22 +376,6 @@
         <button id="resetGameBtn" class="btn-block danger-btn">👾 Réinitialiser le jeu</button>
       </div>
     </section>
-
-    <!-- MODAL: Modifier monde -->
-    <div id="manageWorldModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="modal-content card">
-        <h3 id="manageWorldTitle">Modifier monde</h3>
-
-        <div class="actions">
-          <button id="mwToggleBtn" class="ghost">Désactiver</button>
-          <button id="mwRuleBtn" class="ghost">Règle XP</button>
-        </div>
-
-        <button id="mwDeleteBtn" class="danger-btn btn-block">🗑️ Supprimer le monde</button>
-
-        <button id="mwCloseBtn" class="ghost btn-block" type="button">Fermer</button>
-      </div>
-    </div>
 
     <!-- POPUP -->
     <div id="popup"></div>

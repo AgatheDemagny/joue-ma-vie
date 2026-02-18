@@ -779,8 +779,9 @@ input + label {
 
 .obj-left{
   display:flex;
-  align-items:center;
-  gap:10px;
+  flex-direction: column;
+  align-items:flex-start;
+  gap:2px;
   min-width:0;
 }
 
@@ -793,9 +794,12 @@ input + label {
 
 .obj-meta{
   font-size: 12px;
-  opacity: .8;
-  margin-left: 8px;
+  opacity: 75;
   white-space: nowrap;
+}
+
+.obj-row{
+  padding: 12px 0;
 }
 
 .obj-actions{
@@ -804,19 +808,40 @@ input + label {
   gap:8px;
 }
 
-.obj-check{
-  width: 22px;
-  height: 22px;
-}
+.obj-edit-btn:hover{ background: rgba(255,255,255,0.12); }
 
-.obj-edit-btn{
+/* Objectifs - boutons icônes (✅ ✏️ ↩️) */
+.obj-icon{
   width: 42px;
   height: 42px;
+  padding: 0;
+  margin: 0;
   border-radius: 14px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.10);
+
   display:flex;
   align-items:center;
   justify-content:center;
+
+  background: rgba(255,255,255,0.08);
+  color: var(--text-main);
+  border: 1px solid rgba(255,255,255,0.10);
+
+  box-shadow: 0 10px 18px rgba(0,0,0,0.20);
+  transition: transform 0.12s ease, background 0.12s ease, filter 0.12s ease;
 }
-.obj-edit-btn:hover{ background: rgba(255,255,255,0.12); }
+
+.obj-icon:hover{
+  background: rgba(255,255,255,0.12);
+}
+
+.obj-icon:active{
+  transform: translateY(1px);
+  filter: brightness(0.98);
+}
+
+.obj-icon:disabled{
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
