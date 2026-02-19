@@ -1,170 +1,84 @@
+/* ================== LIFE QUEST — STYLE FINAL (CLEAN) ================== */
+
 /* ================== PALETTE ET TYPO ================== */
 :root{
+  /* Background */
+  --bg-main: #08090C;
+  --bg-secondary: #0D0E12;
 
-  /* ===== BACKGROUND ===== */
-  --bg-main: #0F0F11;
-  --bg-secondary: #141417;
+  /* Surfaces */
+  --card-bg: rgba(255,255,255,0.045);
+  --card-bg-strong: rgba(255,255,255,0.06);
+  --card-border: rgba(242,214,179,0.12);
 
-  /* ===== SURFACES ===== */
-  --card-bg: #1A1A1E;
-  --card-border: rgba(242,214,179,0.08);
-
-  /* ===== BRAND ===== */
+  /* Brand */
   --primary: #C0652A;
   --primary-strong: #E07A36;
 
-  /* ===== ACCENT / XP ===== */
+  /* Accent */
   --accent: #F2D6B3;
-  --accent-glow: rgba(242,214,179,0.35);
+  --accent-glow: rgba(242,214,179,0.30);
 
-  /* ===== TEXT ===== */
+  /* Text */
   --text-main: #F4EFEA;
-  --text-soft: rgba(244,239,234,0.65);
+  --text-soft: rgba(244,239,234,0.68);
 
-  /* ===== XP BAR ===== */
-  --xp-bg: #232327;
-  --xp-fill: linear-gradient(90deg, #C0652A, #F2D6B3);
+  /* Dividers + misc */
+  --divider: rgba(255,255,255,0.06);
 
-}
+  /* Progress */
+  --progress-bg: rgba(255,255,255,0.06);
+  --progress-fill: linear-gradient(90deg, #C0652A, #F2D6B3);
 
-button, .time-input {
-  font-size: 16px;
-  padding: 12px;
+  /* Danger / gold (utilisés dans ton code) */
+  --danger: #6b362a;
+  --gold: var(--accent);
+  --card-border-strong: rgba(255,120,90,0.30);
+
+  /* Radius */
+  --r-1: 14px;
+  --r-2: 18px;
+  --r-3: 22px;
 }
 
 /* ================== RESET + BASE ================== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+*{ box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body{ height: 100%; }
 
 body{
-  background:
-  radial-gradient(1200px 700px at 25% 10%, rgba(192,101,42,0.18), transparent 70%),
-    radial-gradient(1000px 600px at 85% 80%, rgba(242,214,179,0.05), transparent 65%),
-    #08090C;
-  var(--bg-main);
   color: var(--text-main);
+  background:
+    radial-gradient(1200px 700px at 25% 10%, rgba(192,101,42,0.18), transparent 70%),
+    radial-gradient(1000px 600px at 85% 80%, rgba(242,214,179,0.05), transparent 65%),
+    linear-gradient(180deg, var(--bg-main), var(--bg-secondary));
 }
+
+/* ================== LAYOUT GLOBAL ================== */
+.game{
+  padding: 22px 18px;
+  max-width: 420px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* espace vertical entre blocs */
+}
+
+.hidden{ display:none !important; }
 
 /* ================== TITRES ================== */
 h1, h2, h3{
   font-family: 'Space Grotesk', sans-serif;
   letter-spacing: -0.5px;
-}
-
-h1{
-  font-size: 30px;
-  line-height: 1.1;
-  text-align: center;
-  margin: 6px 0 10px;
-}
-
-h2{
-  font-size: 22px;
-  line-height: 1.15;
-  text-align: center;
-  margin: 4px 0 8px;
-}
-
-h3{
-  font-size: 18px;
-  margin: 0 0 10px;
-}
-
-/* ================== BOUTONS ================== */
-button{
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 14px;
-  padding: 10px 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-button:hover{
-  background: var(--primary-strong);
-  box-shadow: 0 0 15px var(--accent-glow);
-}
-
-.btn-block {
   width: 100%;
-  display: block;
-  margin-top: 12px;
+  text-align: center !important; /* ✅ force */
 }
 
-button:active{
-  transform: translateY(1px);
-  filter: brightness(0.98);
-}
+h1{ font-size: 30px; line-height: 1.1; margin: 6px 0 10px; }
+h2{ font-size: 22px; line-height: 1.15; margin: 4px 0 8px; }
+h3{ font-size: 18px; margin: 0 0 10px; }
 
-/* Ghost (garde ton style, mais plus cohérent) */
-.ghost{
-  background: rgba(255,255,255,0.08);
-  color: var(--text-main);
-  border: 1px solid rgba(255,255,255,0.12);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.22);
-}
-.ghost:hover{
-  background: rgba(255,255,255,0.14);
-}
-
-
-/* ================== GRID MONDES ================== */
-.worlds-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.world-btn {
-  padding: 12px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.08);
-  text-align: center;
-  color: var(--text-main);
-  font-weight: 800;
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.26);
-}
-
-.world-btn:hover {
-  background: rgba(255,255,255,0.12);
-}
-
-.world-btn.active { 
-  background: rgba(192,101,42,0.22);
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: 0 14px 30px rgba(192,101,42,0.18);
-}
-
-/* ================== INPUTS ================== */
-input, select {
-  width: 100%;
-  padding: 10px 12px;
-  margin-top: 6px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.10);
-  font-size: 14px;
-  background: rgba(255,255,255,0.08);
-  color: var(--text-main);
-  box-shadow: 0 10px 18px rgba(0,0,0,0.22);
-  outline: none;
-}
-
-input:focus, select:focus {
-  box-shadow: 0 0 0 3px rgba(159, 85, 64, 0.25), 0 12px 24px rgba(0,0,0,0.26);
-  border-color: rgba(159,85,64,0.55);
-}
-
-::placeholder {
-  color: rgba(255,255,255,0.55);
-}
-
+/* sous-titres internes */
 .subsection h4{
   margin: 6px 0 4px;
   text-align: left;
@@ -174,21 +88,25 @@ input:focus, select:focus {
 
 /* ================== CARDS ================== */
 .card{
+  background:
+    radial-gradient(800px 240px at 30% 0%, rgba(242,214,179,0.08), transparent 60%),
+    radial-gradient(700px 240px at 70% 100%, rgba(192,101,42,0.08), transparent 60%),
+    var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--r-3);
+  padding: 18px;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.32);
+  backdrop-filter: blur(10px);
+}
+
+.card:hover{ transform: translateY(-2px); }
+
+/* ✅ subtil = même couleur que les autres (plus d’incohérence bloc Objectifs) */
+.card.subtle{
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 18px;
-  padding: 18px;
-}
-
-
-.card:hover{
-  transform: translateY(-2px);
-}
-
-.card.subtle{
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 10px 22px rgba(0,0,0,0.24);
+  box-shadow: none;
+  opacity: 0.96;
 }
 
 /* lignes internes */
@@ -204,33 +122,96 @@ input:focus, select:focus {
   border-bottom: none;
   padding-bottom: 2px;
 }
-.card strong{
-  color: rgba(255,255,255,0.85);
-}
-.card p span{
-  color: rgba(255,255,255,0.92);
+.card strong{ color: rgba(255,255,255,0.85); font-weight: 800; }
+.card p span{ color: rgba(255,255,255,0.92); }
+
+/* ================== BOUTONS ================== */
+/* ✅ base neutre (pour que les boutons ressortent des cards) */
+button{
+  font-size: 15px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-main);
+  border: 1px solid rgba(242,214,179,0.14);
+  border-radius: var(--r-1);
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform .08s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
 }
 
-.game {
-  padding: 22px 18px;
-  max-width: 420px;
-  margin: auto;
-
-  display: flex;
-  flex-direction: column;
-  gap: 20px; /* espace vertical automatique entre tous les blocs */
+button:hover{
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(242,214,179,0.22);
+  box-shadow: 0 0 18px rgba(242,214,179,0.12);
 }
 
-/* ================== TOPBAR + BANNIÈRE (FIX CHEVAUCHEMENT) ================== */
+button:active{ transform: translateY(1px); filter: brightness(0.98); }
+
+.btn-block{
+  width: 100%;
+  display: block;
+  margin-top: 12px;
+}
+
+/* ✅ bouton principal (à mettre sur Déconnexion, Valider, Créer, etc.) */
+button.primary, .btn-primary{
+  background: linear-gradient(180deg, var(--primary-strong), var(--primary));
+  border-color: rgba(242,214,179,0.22);
+  color: #fff;
+  box-shadow: 0 0 22px rgba(192,101,42,0.18);
+}
+button.primary:hover, .btn-primary:hover{
+  box-shadow: 0 0 26px rgba(192,101,42,0.22), 0 14px 34px rgba(0,0,0,0.28);
+}
+
+/* Ghost */
+.ghost{
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid rgba(242,214,179,0.12);
+}
+.ghost:hover{ background: rgba(255,255,255,0.08); }
+
+/* Icon buttons */
+.icon-btn{
+  width:42px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+}
+
+/* ================== INPUTS ================== */
+input, select{
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(242,214,179,0.12);
+  font-size: 14px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-main);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.22);
+  outline: none;
+}
+
+input:focus, select:focus{
+  box-shadow: 0 0 0 3px rgba(192,101,42,0.18), 0 12px 24px rgba(0,0,0,0.26);
+  border-color: rgba(242,214,179,0.28);
+}
+
+::placeholder{ color: rgba(255,255,255,0.55); }
+
+/* ================== TOPBAR + BANNIÈRE ================== */
 .topbar{
   display: flex;
   align-items: center;
-  justify-content: space-between; /* ✅ settings à droite */
+  justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
 }
 
-/* zone centrale (titre/bannière) si tu en as une */
 .topbar-center{
   flex: 1;
   display:flex;
@@ -239,37 +220,81 @@ input:focus, select:focus {
   min-width: 0;
 }
 
-/* bouton settings */
 #openSettingsBtn.icon-btn{
+  flex: 0 0 44px;
   width: 44px;
   height: 44px;
-  flex: 0 0 44px;
   border-radius: 14px;
-
   background: rgba(0,0,0,0.35);
   backdrop-filter: blur(6px);
-
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
-/* bannière : centrée + marge propre sous topbar */
 .app-banner{
   width: 85%;
   max-width: 420px;
   height: auto;
   display: block;
-  margin: 10px auto 18px auto; /* ✅ espace sous la topbar */
+  margin: 10px auto 18px auto;
   border-radius: 16px;
+  border: 1px solid rgba(242,214,179,0.12);
   box-shadow: 0 16px 40px rgba(0,0,0,0.35);
 }
 
+/* ================== GRID MONDES ================== */
+.worlds-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* ✅ style “carte monde” sans chevron/arrow */
+.world-btn{
+  padding: 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(600px 180px at 20% 20%, rgba(242,214,179,0.08), transparent 60%),
+    rgba(255,255,255,0.05);
+  text-align: left;
+  color: var(--text-main);
+  font-weight: 850;
+  border: 1px solid rgba(242,214,179,0.12);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.26);
+  position: relative;
+  overflow: hidden;
+}
+
+.world-btn:hover{
+  background:
+    radial-gradient(600px 180px at 20% 20%, rgba(242,214,179,0.10), transparent 60%),
+    rgba(255,255,255,0.07);
+  border-color: rgba(242,214,179,0.20);
+}
+
+.world-btn.active{
+  background: rgba(192,101,42,0.20);
+  border-color: rgba(242,214,179,0.22);
+  box-shadow: 0 14px 30px rgba(192,101,42,0.18);
+}
+
 /* ================== BARRES DE PROGRESSION ================== */
+.progress-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin: 6px 0 10px 0;
+}
+
 .progress-bar{
+  flex: 1;                 /* ✅ plus large */
   background: var(--progress-bg);
   border-radius: 999px;
-  height: 16px;              /* un peu plus haut */
+  border: 1px solid rgba(242,214,179,0.10);
+  height: 18px;            /* ✅ plus épais */
   overflow: hidden;
 }
 
@@ -281,11 +306,13 @@ input:focus, select:focus {
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 850;
   white-space: nowrap;
-  padding: 0 8px;            /* espace pour texte */
-  min-width: 38px;           /* évite 0% illisible */
+  padding: 0 10px;
+  min-width: 46px;
   box-sizing: border-box;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  position: relative;
 }
 
 .progress-fill::after{
@@ -293,90 +320,18 @@ input:focus, select:focus {
   position:absolute;
   inset:0;
   background: linear-gradient(180deg, rgba(255,255,255,0.14), rgba(255,255,255,0));
-  opacity: .25;          /* plus soft */
+  opacity: .22;
   pointer-events:none;
 }
 
-
-.progress-line{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  margin: 6px 0 10px 0;
-}
-
 .progress-values{
-  font-weight: 600;
+  min-width: 104px;
+  text-align: right;       /* ✅ valeurs à droite */
+  font-weight: 750;
   white-space: nowrap;
 }
 
-/* ================== SECTIONS ================== */
-.hidden { display: none; }
-
-.list-item, .quest-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.quest-item.done span {
-  text-decoration: line-through;
-  opacity: 0.65;
-}
-
-.level{
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.reward{
-  color: var(--gold);
-  font-weight: 600;
-}
-
-/* ================== POPUP ================== */
-#popup {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  transform: none;
-
-  background: rgba(192,101,42,0.92);
-  color: #fff;
-  padding: 14px 18px;
-  border-radius: 18px 18px 0 0;
-  font-weight: 800;
-
-  box-shadow: 0 -14px 30px rgba(0,0,0,0.35);
-  display: none;
-  z-index: 2000;
-  animation: popupShow 0.35s ease forwards;
-}
-
-@keyframes popupShow {
-  0% { opacity: 0; transform: translateY(16px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
 /* ================== TABS ================== */
-button.icon-btn { width: 42px; }
-
-.icon-btn{
-  width:42px;
-  height:42px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:14px;
-  background: rgba(255,255,255,0.08);
-  color: var(--text-main);
-  border: 1px solid rgba(255,255,255,0.10);
-  box-shadow: 0 10px 18px rgba(0,0,0,0.24);
-}
-
 .tabs{
   display:flex;
   gap:8px;
@@ -402,8 +357,7 @@ button.icon-btn { width: 42px; }
   box-shadow: 0 12px 26px rgba(192,101,42,0.16);
 }
 
-/* segmented */
-/* ✅ segmented semaine */
+/* ================== SEGMENTED (Objectif hebdo) ================== */
 .segmented{
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(242,214,179,0.10);
@@ -420,31 +374,53 @@ button.icon-btn { width: 42px; }
   color: var(--text-soft);
   border-radius: 12px;
   padding: 10px 10px;
-  font-weight: 800;
+  font-weight: 850;
 }
-
-.segmented button.active{
-  background: rgba(242,214,179,0.14);
-  border-color: rgba(242,214,179,0.26);
-  color: var(--text-main);
-  box-shadow: 0 0 18px rgba(242,214,179,0.14);
-}
-
-.segmented button:active{
-  transform: translateY(1px);
-}
-
 
 .segmented button:hover{
-  background: rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.08);
 }
 
-/* ================== MODAL ================== */
+/* ✅ actif terracotta (plus gaming, plus lisible) */
+.segmented button.active{
+  background: rgba(192,101,42,0.22);
+  border-color: rgba(242,214,179,0.22);
+  color: var(--text-main);
+  box-shadow: 0 0 20px rgba(192,101,42,0.18);
+}
+
+.segmented button:active{ transform: translateY(1px); }
+
+/* ================== POPUP (toast centré, jamais coupé) ================== */
+#popup{
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px));
+  background: rgba(192,101,42,0.92);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(242,214,179,0.22);
+  font-weight: 850;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.45);
+  display: none;
+  z-index: 2000;
+  animation: popupShow 0.22s ease forwards;
+}
+
+@keyframes popupShow{
+  from{ opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to{ opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ================== MODALS ================== */
 .modal{
   position:fixed;
   inset:0;
-  background: rgba(0,0,0,0.78);
-  backdrop-filter: blur(2px);
+  background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(4px);
   display:flex;
   align-items:flex-end;
   justify-content:center;
@@ -457,9 +433,11 @@ button.icon-btn { width: 42px; }
   max-width: none;
 }
 
+/* ✅ modals moins sombres, cohérentes avec les cards */
 .modal-content.card{
-  background: rgba(18, 12, 18, 0.96);
-  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(26,26,30,0.96);
+  border: 1px solid rgba(242,214,179,0.14);
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 }
 
 .inline{
@@ -474,13 +452,7 @@ button.icon-btn { width: 42px; }
   gap:8px;
   margin-top:12px;
 }
-
 .actions button{ flex:1; }
-
-.actions button {
-  width: auto;
-  flex: 1;
-}
 
 .hint{
   font-size: 13px;
@@ -488,7 +460,7 @@ button.icon-btn { width: 42px; }
   margin-top:8px;
 }
 
-/* settings grid */
+/* ================== SETTINGS GRID ================== */
 .grid-3{
   display:grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -496,7 +468,7 @@ button.icon-btn { width: 42px; }
   margin:6px 0 10px;
 }
 
-/* objectives */
+/* ================== OBJECTIVE ROWS ================== */
 .objective-row{
   display:flex;
   align-items:center;
@@ -507,10 +479,11 @@ button.icon-btn { width: 42px; }
 
 .objective-row .label{
   flex:1;
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.badge{
+/* badges/pills */
+.badge, .step-pill{
   font-size:12px;
   padding:4px 8px;
   border-radius:999px;
@@ -526,13 +499,85 @@ button.icon-btn { width: 42px; }
   gap:6px;
 }
 
-.step-pill{
-  font-size:12px;
-  padding:4px 8px;
-  border-radius:999px;
-  background: rgba(255,255,255,0.10);
+/* Objectifs - liste */
+.obj-section-title{
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  opacity: .92;
+  font-weight: 850;
+  text-align: left; /* section title = pas forcément centré */
+}
+
+.obj-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding: 12px 12px;
+  margin-top: 10px;
+  border-radius: 18px;
+  background:
+    radial-gradient(600px 180px at 20% 0%, rgba(242,214,179,0.08), transparent 65%),
+    rgba(255,255,255,0.04);
+  border: 1px solid rgba(242,214,179,0.10);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.30);
+}
+
+.obj-left{
+  display:flex;
+  flex-direction: column;
+  align-items:flex-start;
+  gap:2px;
+  min-width:0;
+}
+
+.obj-title{
+  font-weight: 900;
+  font-size: 14.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.obj-meta{
+  font-size: 12px;
+  color: rgba(244,239,234,0.70);
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.obj-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.obj-icon{
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(255,255,255,0.08);
   color: var(--text-main);
   border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.20);
+}
+
+.obj-icon:hover{ background: rgba(255,255,255,0.12); }
+
+.obj-icon:active{
+  transform: translateY(1px);
+  filter: brightness(0.98);
+}
+
+.obj-icon:disabled{
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ================== DANGER ================== */
@@ -547,127 +592,11 @@ button.icon-btn { width: 42px; }
 .danger-btn{
   background: var(--danger);
   color:#fff;
+  border-color: rgba(255,255,255,0.10);
 }
+.danger-btn:hover{ background: #5f2f24; }
 
-.danger-btn:hover{
-  background: #5f2f24;
-}
-
-/* Force la fermeture des modals quand .hidden est présent */
-.modal.hidden {
-  display: none !important;
-}
-
-/* ================== RESPONSIVE MOBILE ================== */
-@media (max-width: 420px) {
-  .worlds-grid { grid-template-columns: 1fr; }
-  .card { padding: 14px; }
-  input, select, button { font-size: 16px; padding: 10px; }
-  .grid-3{ grid-template-columns: 1fr; }
-}
-
-/* ================== Dialog custom ================== */
-.dialog-card{
-  position: relative;
-  overflow: hidden;
-}
-
-.dialog-card::before{
-  background: linear-gradient(120deg,
-    rgba(192,101,42,0.35),
-    rgba(242,214,179,0.25),
-    rgba(192,101,42,0.25)
-  );
-}
-
-.dialog-card > *{
-  position: relative;
-  z-index: 1;
-}
-
-.dialog-message{
-  margin-top: 10px;
-  margin-bottom: 6px;
-  color: rgba(255,255,255,0.86);
-  line-height: 1.35;
-}
-
-@keyframes dialogPop {
-  from { transform: translateY(14px); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-#dialogModal .modal-content{
-  animation: dialogPop 0.18s ease-out;
-}
-
-.dialog-input-wrap{
-  margin-top: 10px;
-}
-.dialog-input-wrap.hidden{
-  display:none;
-}
-#dialogInput{ width:100%; }
-
-/* ================== Typo unify ================== */
-label, .label, .hint {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.card p {
-  font-size: 15px;
-  margin: 8px 0;
-}
-
-.card strong {
-  font-weight: 800;
-}
-
-p,
-label,
-span,
-input,
-select,
-button {
-  font-size: 15px;
-}
-
-.hint {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.section-spacing { margin-top: 20px; }
-
-input + label {
-  margin-top: 16px;
-  display: block;
-}
-
-/* ================== Stats rows helper ================== */
-.stat-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.stat-row:last-child{ border-bottom: none; }
-
-.stat-value{
-  text-align:right;
-  font-weight:600;
-}
-
-.stat-row.compact{
-  padding: 6px 0;
-  border-bottom: none;
-  opacity: .95;
-}
-
-/* ================== LOADING (plein écran + anti banding) ================== */
+/* ================== LOADING ================== */
 .loading{
   position: fixed;
   inset: 0;
@@ -693,7 +622,6 @@ input + label {
   animation: spin 0.9s linear infinite;
 }
 
-/* bruit léger pour casser le “banding / rectangles” */
 .loading::before{
   content:"";
   position:absolute;
@@ -710,618 +638,20 @@ input + label {
   padding: 22px 18px;
   border-radius: 20px;
   background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,120,90,0.28);
+  border: 1px solid rgba(242,214,179,0.18);
   box-shadow: 0 18px 50px rgba(0,0,0,0.45);
   text-align:center;
   backdrop-filter: blur(12px);
 }
 
-.loading-text{
-  font-weight: 700;
-  opacity: .9;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* last safety */
-.hidden{ display:none !important; }
-
-/* Espace vertical entre blocs dans un écran */
-.stack{
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.tab-panel{
-  display:flex;
-  flex-direction:column;
-  gap:18px;
-}
-.tab-panel.hidden{
-  display:none; /* garde ton hidden clean */
-}
-
-
-/* Objectifs - liste */
-.obj-section-title{
-  margin-top: 12px;
-  margin-bottom: 6px;
-  font-size: 14px;
-  opacity: .9;
-  font-weight: 800;
-}
-
-.obj-row{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--divider);
-}
-
-.obj-row:last-child{ border-bottom:none; }
-
-.obj-left{
-  display:flex;
-  flex-direction: column;
-  align-items:flex-start;
-  gap:2px;
-  min-width:0;
-}
-
-.obj-title{
-  font-weight: 700;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.obj-meta{
-  font-size: 12px;
-  opacity: 75;
-  white-space: nowrap;
-}
-
-.obj-row{
-  padding: 12px 0;
-}
-
-.obj-actions{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.obj-edit-btn:hover{ background: rgba(255,255,255,0.12); }
-
-/* Objectifs - boutons icônes (✅ ✏️ ↩️) */
-.obj-icon{
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  margin: 0;
-  border-radius: 14px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  background: rgba(255,255,255,0.08);
-  color: var(--text-main);
-  border: 1px solid rgba(255,255,255,0.10);
-
-  box-shadow: 0 10px 18px rgba(0,0,0,0.20);
-  transition: transform 0.12s ease, background 0.12s ease, filter 0.12s ease;
-}
-
-.obj-icon:hover{
-  background: rgba(255,255,255,0.12);
-}
-
-.obj-icon:active{
-  transform: translateY(1px);
-  filter: brightness(0.98);
-}
-
-.obj-icon:disabled{
-  opacity: 0.35;
-  cursor: not-allowed;
-  box-shadow: none;
-}
-
-/* Milestone: espace au-dessus du sous-bloc "paliers" */
-#objectiveFieldsMilestone .card.subtle,
-#editObjectiveFieldsMilestone .card.subtle{
-  margin-top: 12px;
-}
-
-/* ================== CELEBRATION MODAL ================== */
-.celebration-card{
-  border: 1px solid rgba(242,214,179,0.22);
-  box-shadow:
-    0 18px 60px rgba(0,0,0,0.55),
-    0 0 45px rgba(192,101,42,0.18),
-    0 0 45px rgba(242,214,179,0.10);
-}
-
-.celebration-emoji{
-  font-size: 52px;
-  margin-bottom: 10px;
-  animation: celebrationBounce 0.9s ease-in-out infinite;
-  transform-origin: center;
-}
-
-@keyframes celebrationPop{
-  0% { transform: translateY(18px) scale(0.96); opacity: 0; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
-}
-
-@keyframes celebrationBounce{
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(-2deg); }
-}
-
-/* ✅ TITRES : centrés partout */
-#homeScreen h1, #homeScreen h2,
-#worldScreen h1, #worldScreen h2,
-#settingsScreen h1, #settingsScreen h2,
-#performanceScreen h1, #performanceScreen h2{
-  text-align: center !important;
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-h1{ font-size: 30px; line-height: 1.1; }
-h2{ font-size: 22px; line-height: 1.15; }
-h3{ font-size: 18px; }
-
-
-/* ===========================
-   LIFE QUEST — RPG PREMIUM UI
-   Colle ce bloc en FIN de style.css
-   =========================== */
-
-/* ---- Base ---- */
-:root{
-  --bg-main: #08090C;
-  --bg-2: #0D0E12;
-
-  --card: rgba(255,255,255,0.04);
-  --card-2: rgba(255,255,255,0.06);
-  --stroke: rgba(242,214,179,0.10);
-  --stroke-2: rgba(242,214,179,0.18);
-
-  --text: #F4EFEA;
-  --text-soft: rgba(244,239,234,0.70);
-
-  --primary: #C0652A;
-  --primary-2: #E07A36;
-  --accent: #F2D6B3;
-
-  --shadow: 0 18px 60px rgba(0,0,0,0.55);
-  --shadow-soft: 0 10px 30px rgba(0,0,0,0.35);
-  --glow: 0 0 22px rgba(242,214,179,0.12);
-  --glow-primary: 0 0 26px rgba(192,101,42,0.16);
-
-  --r-1: 14px;
-  --r-2: 18px;
-  --r-3: 22px;
-}
-
-html, body{
-  height: 100%;
-}
-
-body{
-  color: var(--text);
-  background:
-    radial-gradient(1200px 700px at 25% 12%, rgba(192,101,42,0.16), transparent 70%),
-    radial-gradient(900px 520px at 80% 78%, rgba(242,214,179,0.06), transparent 65%),
-    linear-gradient(180deg, var(--bg-main), var(--bg-2));
-}
-
-/* ---- Layout breathing ---- */
-.game{
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 18px 16px 28px;
-}
-
-/* Espace vertical entre les blocs */
-.card, .world-card, .section, .panel{
-  margin: 12px 0;
-}
-
-/* ---- Headings ---- */
-h1, h2, h3{
-  color: var(--text);
-  letter-spacing: -0.4px;
-}
-
-#homeScreen h1, #worldScreen h1, #settingsScreen h1, #performanceScreen h1,
-#homeScreen h2, #worldScreen h2, #settingsScreen h2, #performanceScreen h2{
-  text-align: center !important;
-  width: 100%;
-}
-
-h1{ font-size: 30px; line-height: 1.08; margin: 8px 0 10px; }
-h2{ font-size: 22px; line-height: 1.12; margin: 6px 0 10px; }
-h3{ font-size: 17px; margin: 14px 0 10px; color: rgba(244,239,234,0.88); }
-
-/* ---- Cards (verre fumé premium) ---- */
-.card{
-  background:
-    radial-gradient(800px 240px at 30% 0%, rgba(242,214,179,0.08), transparent 60%),
-    radial-gradient(700px 240px at 70% 100%, rgba(192,101,42,0.08), transparent 60%),
-    var(--card);
-  border: 1px solid var(--stroke);
-  border-radius: var(--r-3);
-  box-shadow: var(--shadow-soft);
-  padding: 18px;
-  backdrop-filter: blur(10px);
-}
-
-.card.subtle{
-  background: var(--card);
-  box-shadow: none;
-}
-
-/* ---- Small hint text ---- */
-.hint, .muted{
-  color: var(--text-soft);
-}
-
-/* ---- Buttons ---- */
-button{
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border: 1px solid rgba(242,214,179,0.14);
-  border-radius: var(--r-1);
-  padding: 10px 14px;
-  font-weight: 750;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  transition: transform .08s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
-}
-
-button:hover{
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: var(--glow);
-}
-
-button:active{
-  transform: translateY(1px);
-}
-
-button.primary{
-  background: linear-gradient(180deg, rgba(224,122,54,0.95), rgba(192,101,42,0.92));
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: var(--glow-primary);
-}
-
-button.primary:hover{
-  box-shadow: var(--glow-primary), var(--shadow-soft);
-}
-
-/* Ghost */
-button.ghost{
-  background: transparent;
-  border-color: rgba(242,214,179,0.12);
-}
-
-/* ---- Inputs ---- */
-input, select, textarea{
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  border: 1px solid rgba(242,214,179,0.12);
-  border-radius: var(--r-1);
-  padding: 10px 12px;
-  outline: none;
-}
-
-input:focus, select:focus, textarea:focus{
-  border-color: rgba(242,214,179,0.28);
-  box-shadow: 0 0 0 3px rgba(192,101,42,0.18);
-}
-
-/* ---- Progress bars ---- */
-.progress-bar{
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(242,214,179,0.10);
-  border-radius: 999px;
-  height: 16px;
-  overflow: hidden;
-}
-
-.progress-fill{
-  height: 100%;
-  background: linear-gradient(90deg, rgba(192,101,42,0.95), rgba(242,214,179,0.92));
-  border-radius: 999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size: 12px;
-  font-weight: 850;
-  white-space: nowrap;
-  padding: 0 8px;
-  min-width: 42px;
-  box-sizing: border-box;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
-}
-
-/* ---- Segmented (semaine chargée/normale/légère) ---- */
-.segmented{
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(242,214,179,0.12);
-  border-radius: var(--r-2);
-  padding: 6px;
-  display:flex;
-  gap: 6px;
-  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.18);
-}
-
-.segmented button{
-  flex: 1;
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(244,239,234,0.75);
-  padding: 10px 10px;
-  border-radius: 12px;
-}
-
-.segmented button.active{
-  background: rgba(242,214,179,0.14);
-  border-color: rgba(242,214,179,0.26);
-  color: var(--text);
-  box-shadow: var(--glow);
-}
-
-/* ---- Tabs (monde / perf) ---- */
-.tabs{
-  display:flex;
-  gap: 10px;
-  margin: 10px 0 6px;
-}
-
-.tab-btn{
-  flex: 1;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(242,214,179,0.12);
-  border-radius: 999px;
-  padding: 10px 12px;
-  font-weight: 850;
-  color: rgba(244,239,234,0.80);
-}
-
-.tab-btn.active{
-  background: rgba(192,101,42,0.22);
-  border-color: rgba(242,214,179,0.22);
-  color: var(--text);
-  box-shadow: var(--glow-primary);
-}
-
-/* ---- Worlds grid (les boutons “nom de monde”) ---- */
-.worlds-grid{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-@media (min-width: 520px){
-  .worlds-grid{
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-/* Remplace le look “bouton plat” par “carte monde” */
-.world-btn{
-  text-align: left;
-  width: 100%;
-  padding: 14px 14px;
-  border-radius: var(--r-3);
-  background:
-    radial-gradient(600px 180px at 20% 20%, rgba(242,214,179,0.08), transparent 60%),
-    rgba(255,255,255,0.05);
-  border: 1px solid rgba(242,214,179,0.12);
-  box-shadow: var(--shadow-soft);
-  position: relative;
-  overflow: hidden;
-}
-
-.world-btn::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: radial-gradient(400px 180px at 70% 20%, rgba(192,101,42,0.16), transparent 60%);
-  opacity: .6;
-  pointer-events:none;
-}
-
-.world-btn:hover{
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: var(--shadow), var(--glow);
-}
-
-.world-btn:active{
-  transform: translateY(1px);
-}
-
-/* Optionnel: si tu utilises .world-btn.active quelque part */
-.world-btn.active{
-  background: rgba(192,101,42,0.18);
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: var(--shadow), var(--glow-primary);
-}
-
-/* ---- Rows (objectives / entries) ---- */
-.objective-row, .obj-row{
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(242,214,179,0.10);
-  border-radius: var(--r-2);
-  padding: 12px 12px;
-}
-
-.obj-section-title{
-  margin: 14px 0 8px;
-  font-weight: 900;
-  color: rgba(244,239,234,0.88);
-}
-
-/* petits boutons icônes */
-.obj-icon{
-  width: 42px;
-  height: 38px;
-  padding: 0;
-  border-radius: 12px;
-}
-
-/* ---- Popup ---- */
-#popup{
-  position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
-  background: rgba(192,101,42,0.92);
-  color: #fff;
-  border: 1px solid rgba(242,214,179,0.22);
-  border-radius: 999px;
-  padding: 10px 14px;
-  box-shadow: var(--shadow), var(--glow-primary);
-  display:none;
-  z-index: 9999;
-}
-
-/* ---- Modals (add world / dialog / celebration) ---- */
-.modal, .dialog-modal, .celebration-modal{
-  backdrop-filter: blur(10px);
-}
-
-.modal-card, .dialog-card, .celebration-card{
-  background:
-    radial-gradient(700px 220px at 30% 0%, rgba(242,214,179,0.08), transparent 60%),
-    rgba(18,18,22,0.92);
-  border: 1px solid rgba(242,214,179,0.16);
-  border-radius: 22px;
-  box-shadow: var(--shadow);
-}
-
-/* ---- Loading ---- */
-.loading{
-  background:
-    radial-gradient(1200px 700px at 25% 10%, rgba(192,101,42,0.18), transparent 70%),
-    radial-gradient(900px 520px at 80% 78%, rgba(242,214,179,0.06), transparent 65%),
-    #08090C;
-}
-
-.spinner{
-  border-top-color: rgba(242,214,179,0.95);
-}
-
-.app-banner{
-  border-radius: 22px;
-  overflow: hidden;
-  border: 1px solid rgba(242,214,179,0.12);
-  box-shadow: var(--shadow-soft);
-  margin: 10px 0 14px;
-}
-
-.app-banner img{
-  display:block;
-  width: 100%;
-  height: auto;
-}
-
-/* ===== QUEST LOG (Objectifs) ===== */
-
-.obj-row{
-  display:flex;
-  justify-content:space-between;
-  gap: 12px;
-  align-items:center;
-
-  background:
-    radial-gradient(600px 180px at 20% 0%, rgba(242,214,179,0.08), transparent 65%),
-    rgba(255,255,255,0.04);
-  border: 1px solid rgba(242,214,179,0.10);
-  border-radius: 18px;
-  padding: 12px 12px;
-  box-shadow: 0 10px 26px rgba(0,0,0,0.32);
-}
-
-.obj-left{ min-width: 0; }
-
-.obj-title{
-  font-weight: 950;
-  font-size: 14.5px;
-  letter-spacing: -0.2px;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.obj-meta{
-  font-size: 12px;
-  color: rgba(244,239,234,0.70);
-  font-weight: 750;
-  margin-top: 3px;
-}
-
-/* Petit “chip” XP (on va l’utiliser via JS optionnel) */
-.obj-xp-chip{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(242,214,179,0.16);
-  background: rgba(242,214,179,0.10);
-  color: rgba(244,239,234,0.92);
-  font-weight: 900;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-/* actions à droite */
-.obj-actions{
-  display:flex;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-.obj-icon{
-  width: 42px;
-  height: 40px;
-  border-radius: 14px;
-  border: 1px solid rgba(242,214,179,0.14);
-  background: rgba(255,255,255,0.06);
-}
-
-.obj-icon:hover{
-  border-color: rgba(242,214,179,0.22);
-  box-shadow: 0 0 18px rgba(242,214,179,0.12);
-}
-
-/* styles spécifiques : valider / éditer / undo (selon emojis) */
-.obj-icon[title*="Valider"]{
-  background: rgba(192,101,42,0.18);
-  border-color: rgba(242,214,179,0.20);
-}
-.obj-icon[title*="Modifier"]{
-  background: rgba(255,255,255,0.06);
-}
-.obj-icon[title*="Annuler"]{
-  background: rgba(242,214,179,0.08);
-}
-
-/* Sections */
-.obj-section-title{
-  margin: 14px 0 8px;
-  font-weight: 950;
-  letter-spacing: -0.2px;
-  color: rgba(244,239,234,0.88);
+.loading-text{ font-weight: 700; opacity: .9; }
+
+@keyframes spin{ to { transform: rotate(360deg); } }
+
+/* ================== RESPONSIVE MOBILE ================== */
+@media (max-width: 420px){
+  .worlds-grid { grid-template-columns: 1fr; }
+  .card { padding: 14px; }
+  input, select, button { font-size: 16px; padding: 10px; }
+  .grid-3{ grid-template-columns: 1fr; }
 }

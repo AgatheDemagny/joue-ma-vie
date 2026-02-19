@@ -47,17 +47,18 @@
       <div class="card">
         <h2>Choisis ton pseudo</h2>
         <input id="playerNameInput" type="text" placeholder="Ex : Agathe" maxlength="24" />
-        <button id="startBtn">Commencer</button>
+        <button id="startBtn" class="primary btn-block">Commencer</button>
       </div>
     </section>
 
     <!-- HOME -->
     <section id="homeScreen" class="hidden stack">
-      <header class="topbar">
-        <img src="icons/banner-1080-420.png" alt="Life Quest" class="app-banner">
-        <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
-      </header>
-
+    <header class="topbar">
+      <div style="width:44px;"></div>
+      <div class="topbar-center"></div>
+      <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
+    </header>
+    <img src="icons/banner-1080-420.png" alt="Life Quest" class="app-banner">
       <!-- Onglet stats -->
       <div id="homeStats">
         <div class="card">
@@ -83,20 +84,32 @@
               <button data-load="normal" class="active">Normale</button>
               <button data-load="light">Légère</button>
             </div>
-            <div class="stat-row compact">
+            <div class="progress-line">
               <span class="stat-label">Hebdo</span>
-              <span class="stat-value"><span id="weekXp"></span>/<span id="weekGoal"></span> XP</span>
+
+              <div class="progress-bar">
+                <div class="progress-fill" id="weekProgress">0%</div>
+              </div>
+
+              <span class="progress-values">
+                <span id="weekXp"></span>/<span id="weekGoal"></span> XP
+              </span>
             </div>
-            <div class="progress-bar"><div class="progress-fill" id="weekProgress">0%</div></div>
           </div>
 
           <div class="subsection" style="margin-top:12px;">
             <h4>Mensuel</h4>
-            <div class="stat-row compact">
+            <div class="progress-line">
               <span class="stat-label">Mensuel</span>
-              <span class="stat-value"><span id="monthXp"></span>/<span id="monthGoal"></span> XP</span>
+
+              <div class="progress-bar">
+                <div class="progress-fill" id="monthProgress">0%</div>
+              </div>
+
+              <span class="progress-values">
+                <span id="monthXp"></span>/<span id="monthGoal"></span> XP
+              </span>
             </div>
-            <div class="progress-bar"><div class="progress-fill" id="monthProgress">0%</div></div>
           </div>
 
           <button id="openPerformanceBtn" class="ghost btn-block">🏃🏽‍♀️‍➡️ Performances passées</button>
@@ -129,7 +142,7 @@
             </div>
 
             <div class="actions">
-              <button id="createWorldBtn">Créer</button>
+              <button id="createWorldBtn" class="primary">Créer</button>
               <button id="cancelWorldBtn" class="ghost" type="button">Annuler</button>
             </div>
           </div>
@@ -170,7 +183,7 @@
         <div class="card">
           <h3>Saisir du temps</h3>
           <input id="timeMinutesInput" type="number" min="1" inputmode="numeric" placeholder="Minutes (ex : 45)" />
-          <button class="btn-block" id="validateTimeBtn">Valider</button>
+          <button class="primary btn-block" id="validateTimeBtn">Valider</button>
           <p class="hint" id="timePreview"></p>
         </div>
 
@@ -227,10 +240,10 @@
               <div id="milestoneStepsPreview" class="steps-preview"></div>
             </div>
 
-            <button id="createMilestoneObjectiveBtn">Créer l’objectif palier</button>
+            <button id="createMilestoneObjectiveBtn" class="primary btn-block">Créer l’objectif palier</button>
           </div>
 
-          <button class="btn-block" id="createObjectiveBtn">Ajouter</button>
+          <button class="primary btn-block" id="createObjectiveBtn">Ajouter</button>
         </div>
         <!-- MODAL: Modifier objectif -->
         <div id="editObjectiveModal" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true">
@@ -275,10 +288,10 @@
                 <div id="editMilestoneStepsPreview" class="steps-preview"></div>
               </div>
 
-              <button id="editSaveMilestoneBtn">Enregistrer l’objectif palier</button>
+              <button id="editSaveMilestoneBtn" class="primary btn-block">Enregistrer l’objectif palier</button>
             </div>
             <div class="actions">
-              <button id="editSaveObjectiveBtn">Enregistrer</button>
+              <button id="editSaveObjectiveBtn" class="primary">Enregistrer</button>
               <button id="editCancelObjectiveBtn" class="ghost" type="button">Annuler</button>
             </div>
             <button id="editDeleteObjectiveBtn" class="danger-btn btn-block" type="button">
@@ -355,7 +368,7 @@
             <input id="weekGoalLightInput" type="number" min="1" inputmode="numeric" />
           </div>
         </div>
-        <button class="btn-block" id="saveGoalsBtn">Enregistrer</button>
+        <button class="primary btn-block" id="saveGoalsBtn">Enregistrer</button>
       </div>
 
       <div class="card">
