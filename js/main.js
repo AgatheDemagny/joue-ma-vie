@@ -831,24 +831,26 @@ function renderWorlds() {
   activeWorlds.forEach(world => {
     const btn = document.createElement("button");
     btn.className = "world-btn";
+
     const time = world?.stats?.timeTotal ?? 0;
     const xp = world?.stats?.totalXp ?? 0;
     const hh = Math.floor(time / 60);
     const mm = time % 60;
 
     btn.innerHTML = `
-      <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
-        <div style="font-size:16px;font-weight:900;">${world.icon} ${world.name}</div>
-        <div style="font-size:12px;color:rgba(244,239,234,0.70);font-weight:800;">▶</div>
+      <div class="world-title-row">
+        <div class="world-title">${world.icon} ${world.name}</div>
       </div>
-      <div style="margin-top:6px;font-size:12px;color:rgba(244,239,234,0.70);font-weight:750;">
+      <div class="world-meta">
         ${String(hh).padStart(2,"0")}h${String(mm).padStart(2,"0")} • ${xp} XP
       </div>
     `;
+
     btn.onclick = () => openWorld(world.id);
     worldsListEl.appendChild(btn);
   });
 }
+
 
 function renderWorldScreen() {
   const w = state.worlds[state.activeWorldId];

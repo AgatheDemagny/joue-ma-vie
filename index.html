@@ -53,12 +53,11 @@
 
     <!-- HOME -->
     <section id="homeScreen" class="hidden stack">
-    <header class="topbar">
-      <div style="width:44px;"></div>
-      <div class="topbar-center"></div>
-      <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
-    </header>
-    <img src="icons/banner-1080-420.png" alt="Life Quest" class="app-banner">
+      <header class="topbar home-topbar">
+        <img src="icons/banner-1080-420.png" alt="Life Quest" class="app-banner banner-inline">
+        <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
+      </header>
+
       <!-- Onglet stats -->
       <div id="homeStats">
         <div class="card">
@@ -79,39 +78,29 @@
 
           <div class="subsection">
             <h4>Hebdomadaire</h4>
-            <div class="segmented" id="weekLoadPicker">
-              <button data-load="busy">Chargée</button>
-              <button data-load="normal" class="active">Normale</button>
-              <button data-load="light">Légère</button>
-            </div>
-            <div class="progress-line">
-              <span class="stat-label">Hebdo</span>
-
+            <div class="stat-row compact"> 
+              <span class="stat-label">Hebdo</span> 
+              <span class="stat-value">
+                <span id="weekXp"></span>/<span id="weekGoal"></span> XP</span> 
+              </div> 
               <div class="progress-bar">
                 <div class="progress-fill" id="weekProgress">0%</div>
-              </div>
+              </div> 
+            </div> 
 
-              <span class="progress-values">
-                <span id="weekXp"></span>/<span id="weekGoal"></span> XP
-              </span>
+            <div class="subsection" style="margin-top:12px;"> 
+              <h4>Mensuel</h4>
+              <div class="stat-row compact"> 
+                <span class="stat-label">Mensuel</span> 
+                <span class="stat-value">
+                  <span id="monthXp"></span>/<span id="monthGoal"></span> XP</span> 
+                </div> 
+                <div class="progress-bar">
+                  <div class="progress-fill" id="monthProgress">0%</div>
+                </div> 
+              </div>
             </div>
           </div>
-
-          <div class="subsection" style="margin-top:12px;">
-            <h4>Mensuel</h4>
-            <div class="progress-line">
-              <span class="stat-label">Mensuel</span>
-
-              <div class="progress-bar">
-                <div class="progress-fill" id="monthProgress">0%</div>
-              </div>
-
-              <span class="progress-values">
-                <span id="monthXp"></span>/<span id="monthGoal"></span> XP
-              </span>
-            </div>
-          </div>
-
           <button id="openPerformanceBtn" class="ghost btn-block">🏃🏽‍♀️‍➡️ Performances passées</button>
         </div>
       </div>
