@@ -723,6 +723,13 @@ input:focus, select:focus{
   .grid-3{ grid-template-columns: 1fr; }
 }
 
+.mode-label{
+  margin-top: 6px;
+  margin-bottom: 10px; /* ✅ espace sous "Mode" */
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
 /* ================== LAYOUT GLOBAL ================== */
 .game{
   padding: 22px 18px;
@@ -863,6 +870,31 @@ input:focus, select:focus{
   margin-bottom: 8px;
 }
 
+/* HOME > Objectifs : rendre les sous-sections plus visibles */
+#homeObjectives .subsection h4{
+  align-items: center;          /* au lieu de baseline */
+}
+
+/* Petit "badge" à droite dans les h4 */
+#homeObjectives .subsection h4 .badge-right{
+  margin-left: auto;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(242,214,179,0.12);
+  color: var(--text-soft);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+#homeObjectives .mode-label{
+  margin-top: 6px;
+  margin-bottom: 10px; /* ✅ espace sous Mode */
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
 /* SETTINGS > Objectifs : respirations */
 #settingsScreen .card label{
   display:block;
@@ -875,4 +907,15 @@ input:focus, select:focus{
 
 #settingsScreen .card .grid-3{
   margin-top: 10px;
+}
+
+/* MODAL : uniformiser label -> input */
+.modal-content input,
+.modal-content select{
+  margin-top: 0; /* ✅ on enlève le 6px en modal */
+}
+
+.modal-content label{
+  margin-bottom: 6px; /* ✅ petit espace constant */
+  font-weight: 600;
 }

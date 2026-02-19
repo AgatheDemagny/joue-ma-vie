@@ -56,7 +56,7 @@
     <section id="homeScreen" class="hidden stack">
       <header class="topbar">
         <img src="icons/banner-1080-420.png" alt="Life Quest" class="app-banner">
-        <button id="openSettingsBtn" class="icon-btn" aria-label="Paramètres">⚙️</button>
+        <button id="openSettingsBtn" class="obj-icon-inline"" aria-label="Paramètres">⚙️</button>
       </header>
 
       <!-- Onglet stats -->
@@ -79,8 +79,7 @@
 
           <!-- ================= HEBDOMADAIRE ================= -->
           <div class="subsection">
-            <h4>Hebdomadaire</h4>
-
+            <h4>Hebdomadaire <span class="badge-right">Semaine</span></h4>
             <div class="mode-label">Mode</div>
 
             <div class="segmented" id="weekLoadPicker">
@@ -103,7 +102,7 @@
 
           <!-- ================= MENSUEL ================= -->
           <div class="subsection">
-            <h4>Mensuel</h4>
+            <h4>Mensuel <span class="badge-right">Mois</span></h4>
 
             <div class="stat-row">
               <span class="stat-label">Progression</span>
@@ -117,10 +116,13 @@
             </div>
           </div>
 
-          <!-- ================= BOUTON FIXE ================= -->
-          <button id="openPerformanceBtn" class="ghost btn-block">
-            🏃🏽‍♀️ Performances passées
-          </button>
+          <div class="subsection">
+            <h4><span>Historique</span>
+
+            <button id="openPerformanceBtn" class="ghost btn-block">
+              🏃🏽‍♀️ Performances passées
+            </button>
+          </div>
 
         </div>
       </div>
@@ -165,9 +167,9 @@
     <!-- WORLD -->
     <section id="worldScreen" class="hidden stack">
       <header class="topbar">
-        <button id="backHomeBtn" class="icon-btn" aria-label="Retour">←</button>
+        <button id="backHomeBtn" class="obj-icon-inline" aria-label="Retour">🔙</button>
         <h2 id="worldHeaderTitle"></h2>
-        <button id="worldQuickSettingsBtn" class="icon-btn" aria-label="Paramètres monde">⚙️</button>
+        <button id="worldQuickSettingsBtn" class="obj-icon-inline" aria-label="Paramètres monde">⚙️</button>
       </header>
 
       <div class="tabs">
@@ -351,7 +353,7 @@
     <!-- SETTINGS -->
     <section id="settingsScreen" class="hidden stack">
       <header class="topbar">
-        <button id="backFromSettingsBtn" class="icon-btn" aria-label="Retour">←</button>
+        <button id="backFromSettingsBtn" class="obj-icon-inline" aria-label="Retour">←</button>
         <h2>⚙️ Paramètres</h2>
         <div style="width:40px;"></div>
       </header>

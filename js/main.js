@@ -100,6 +100,10 @@ function load() {
 
   // ensure defaults exist
   if (!data.settings) data.settings = def.settings;
+  const validLoads = ["chill", "focus", "boss"];
+  if (!validLoads.includes(data.settings.weekLoad)) {
+    data.settings.weekLoad = def.settings.weekLoad; // "focus"
+  }
   if (!data.periods) data.periods = def.periods;
   if (!data.global) data.global = def.global;
   if (!data.worlds) data.worlds = {};
@@ -543,14 +547,16 @@ document.addEventListener("click", (e) => {
 
 const resetGoalsBtn = document.getElementById("resetGoalsBtn");
 
-resetGoalsBtn.addEventListener("click", () => {
-  const defaults = defaultData().settings;
+if (resetGoalsBtn) {
+  resetGoalsBtn.addEventListener("click", () => {
+    const defaults = defaultData().settings;
 
-  document.getElementById("weekGoalChillInput").value = defaults.weekGoals.chill;
-  document.getElementById("weekGoalFocusInput").value = defaults.weekGoals.focus;
-  document.getElementById("weekGoalBossInput").value  = defaults.weekGoals.boss;
-  document.getElementById("monthGoalInput").value     = defaults.monthGoal;
-});
+    document.getElementById("weekGoalChillInput").value = defaults.weekGoals.chill;
+    document.getElementById("weekGoalFocusInput").value = defaults.weekGoals.focus;
+    document.getElementById("weekGoalBossInput").value  = defaults.weekGoals.boss;
+    document.getElementById("monthGoalInput").value     = defaults.monthGoal;
+  });
+}
 
 // ================== Levels ==================
 function xpForNextLevel(level, base, growth) {
