@@ -954,3 +954,44 @@ input:focus, select:focus{
 .form-card .card.subtle{
   margin: 0;
 }
+
+/* ================== FORMS : sous-blocs (Objectifs) ================== */
+
+/* Les sous-blocs de champs doivent avoir leur propre rythme vertical */
+.form-card #objectiveFieldsRepeatable,
+.form-card #objectiveFieldsUnique,
+.form-card #objectiveFieldsMilestone,
+.form-card #editObjectiveFieldsRepeatable,
+.form-card #editObjectiveFieldsUnique,
+.form-card #editObjectiveFieldsMilestone{
+  display: flex;
+  flex-direction: column;
+  gap: 12px;           /* ✅ régulier */
+  margin-top: 2px;
+}
+
+/* Dans ces sous-blocs, on neutralise encore le margin-top global des inputs */
+.form-card #objectiveFieldsRepeatable input,
+.form-card #objectiveFieldsUnique input,
+.form-card #objectiveFieldsMilestone input,
+.form-card #objectiveFieldsRepeatable select,
+.form-card #objectiveFieldsUnique select,
+.form-card #objectiveFieldsMilestone select,
+.form-card #editObjectiveFieldsRepeatable input,
+.form-card #editObjectiveFieldsUnique input,
+.form-card #editObjectiveFieldsMilestone input,
+.form-card #editObjectiveFieldsRepeatable select,
+.form-card #editObjectiveFieldsUnique select,
+.form-card #editObjectiveFieldsMilestone select{
+  margin-top: 0;
+}
+
+/* Les hints (tes p.hint) : ne pas empiler des trous */
+.form-card p.hint{
+  margin: -6px 0 0;
+}
+
+/* Inline dans les forms : pas de trou au-dessus */
+.form-card .inline{
+  margin-top: 0;
+}
