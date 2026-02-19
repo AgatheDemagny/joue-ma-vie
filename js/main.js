@@ -30,7 +30,7 @@ function defaultData() {
     version: DATA_VERSION,
     playerName: null,
 
-    meta: { updatedAt: Date.now() },
+    meta: { updatedAt: 0, freshInstall: true },
 
     settings: {
       weekLoad: "normal",
@@ -63,6 +63,7 @@ function defaultData() {
 
 let settingsReturnTo = "home"; // "home" ou "world"
 let editingObjectiveId = null; // null = ajout, sinon = modification
+let cloudHydrated = false;
 
 function resetObjectiveForm(){
   editingObjectiveId = null;
@@ -88,20 +89,33 @@ function resetObjectiveForm(){
 }
 
 function load() {
-  const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-  const data = raw && typeof raw === "object" ? raw : defaultData();
+  let raw = null;
+  try {
+    raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  } catch(e) {}
+
+  const hadLocal = !!raw && typeof raw === "object";
+  const data = hadLocal ? raw : defaultData();
+  const def = defaultData();
 
   // ensure defaults exist
-  if (!data.settings) data.settings = defaultData().settings;
-  if (!data.periods) data.periods = defaultData().periods;
-  if (!data.global) data.global = defaultData().global;
+  if (!data.settings) data.settings = def.settings;
+  if (!data.periods) data.periods = def.periods;
+  if (!data.global) data.global = def.global;
   if (!data.worlds) data.worlds = {};
-  if (data.settings.weekGoals == null) data.settings.weekGoals = defaultData().settings.weekGoals;
-  if (!data.meta) data.meta = { updatedAt: Date.now() };
-  if (!data.meta.updatedAt) data.meta.updatedAt = Date.now();
+  if (data.settings.weekGoals == null) data.settings.weekGoals = def.settings.weekGoals;
+  if (!data.meta) data.meta = { updatedAt: 0, freshInstall: !hadLocal };
+  if (data.meta.updatedAt == null) data.meta.updatedAt = 0;
   if (!data.history) data.history = { weeks: {}, months: {} };
   if (!data.history.weeks) data.history.weeks = {};
   if (!data.history.months) data.history.months = {};
+
+  if (!hadLocal) {
+    data.meta.freshInstall = true;
+    data.meta.updatedAt = 0;
+  } else {
+    data.meta.freshInstall = false;
+  }
 
   // reset week/month if keys changed
   const wk = getISOWeekKey();
@@ -2159,6 +2173,9 @@ let cloudSaveTimer = null;
   // ✅ source de vérité au refresh
   auth.onAuthStateChanged(async (user) => {
     cloudAuthUser = user || null;
+    cloudHydrated = false;
+    await pullCloudAndMerge();
+    cloudHydrated = true;
 
     // Loading visible tant qu’on n’a pas décidé
     showScreen(loadingScreen);
@@ -2199,6 +2216,7 @@ function initCloudDbIfReady() {
 
 function scheduleCloudSave() {
   if (!cloudAuthUser) return;
+  if (!cloudHydrated) return; // ✅ pas de push tant que pas hydraté
   if (!initCloudDbIfReady()) return;
 
   clearTimeout(cloudSaveTimer);
@@ -2233,7 +2251,13 @@ async function pullCloudAndMerge() {
   const ref = cloudSaveRef(uid);
   const snap = await ref.get();
 
+  // si pas de cloud: on crée à partir du local (même fresh)
   if (!snap.exists) {
+    // le user est nouveau => ok de pousser
+    state.meta = state.meta || {};
+    state.meta.freshInstall = false;
+    state.meta.updatedAt = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     await pushCloudSave();
     showPopup("☁️ Sauvegarde cloud créée");
     return;
@@ -2241,15 +2265,36 @@ async function pullCloudAndMerge() {
 
   const cloud = snap.data() || {};
   const cloudState = cloud.state;
-  const cloudUpdatedAt = cloud.updatedAt || 0;
-  const localUpdatedAt = state?.meta?.updatedAt || 0;
+  const cloudUpdatedAt = Number(cloud.updatedAt || 0);
 
+  const localUpdatedAt = Number(state?.meta?.updatedAt || 0);
+  const isFresh = !!state?.meta?.freshInstall;
+
+  // ✅ PROTECTION CRITIQUE : si cache vidé (= fresh) et cloud existe => on recharge cloud
+  if (isFresh && cloudState) {
+    state = cloudState;
+    state.meta = state.meta || {};
+    state.meta.freshInstall = false;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    showPopup("☁️ Données récupérées (cloud)");
+    return;
+  }
+
+  // comportement normal: la plus récente gagne
   if (cloudState && cloudUpdatedAt > localUpdatedAt) {
     state = cloudState;
+    state.meta = state.meta || {};
+    state.meta.freshInstall = false;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     showPopup("☁️ Données récupérées");
   } else {
+    // avant de pousser, on marque plus fresh
+    state.meta = state.meta || {};
+    state.meta.freshInstall = false;
+    state.meta.updatedAt = Date.now();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     await pushCloudSave();
     showPopup("☁️ Données synchronisées");
   }
 }
+
