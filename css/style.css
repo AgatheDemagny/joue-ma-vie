@@ -719,6 +719,11 @@ input:focus, select:focus{
   margin: 10px auto 18px;
 }
 
+#homeScreen .topbar.home-topbar{
+  align-items:center;
+  gap: 12px;
+}
+
 #homeScreen .topbar .app-banner.banner-inline{
   width: auto !important;
   height: 46px !important;
@@ -726,6 +731,33 @@ input:focus, select:focus{
   margin: 0 !important;
   object-fit: contain;
   border-radius: 12px;
+}
+
+/* === HOME TOPBAR : bannière grande à gauche, bouton à droite === */
+#homeScreen .topbar.home-topbar{
+  align-items:center;
+  gap: 12px;
+}
+
+/* IMPORTANT : empêcher l'image d'être compressée par flex */
+#homeScreen .topbar.home-topbar .app-banner.banner-inline{
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-shrink: 0;
+
+  height: 64px !important;       /* <-- plus grand */
+  width: auto !important;
+  max-width: calc(100% - 56px) !important;
+  margin: 0 !important;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+/* sur petits écrans, un poil plus petit */
+@media (max-width: 420px){
+  #homeScreen .topbar.home-topbar .app-banner.banner-inline{
+    height: 56px !important;
+  }
 }
 
 .stat-row{
@@ -776,4 +808,27 @@ input:focus, select:focus{
 }
 #homeObjectives h4::after{
   content: "";
+}
+
+/* Titres Hebdo/Mensuel plus lisibles */
+#homeObjectives h4,
+#settingsScreen h4{
+  font-size: 16px !important;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  margin-bottom: 8px;
+}
+
+/* SETTINGS > Objectifs : respirations */
+#settingsScreen .card label{
+  display:block;
+  margin-top: 12px;
+}
+
+#settingsScreen .card #monthGoalInput{
+  margin-bottom: 14px; /* espace AVANT la section hebdo */
+}
+
+#settingsScreen .card .grid-3{
+  margin-top: 10px;
 }
