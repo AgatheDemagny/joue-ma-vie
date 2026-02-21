@@ -1010,3 +1010,7 @@ input:focus, select:focus{
 .form-card .inline{
   margin-top: 0;
 }
+
+#pastTimeBox{
+  margin-top: 12px;
+}

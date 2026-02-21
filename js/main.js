@@ -1449,13 +1449,11 @@ function formatDateTime(ts) {
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 function canDeleteEntry(entry) {
-  const ageMs = Date.now() - entry.createdAt;
-  return ageMs <= 24 * 60 * 60 * 1000;
+  return true;
 }
 
 function canUndo(ts) {
-  if (!ts) return false;
-  return (Date.now() - ts) <= 24 * 60 * 60 * 1000;
+  return true;
 }
 
 function formatDateShort(ts){
@@ -1591,7 +1589,7 @@ async function deleteEntry(entryId) {
 
   w.stats.totalXp = Math.max(0, (w.stats.totalXp || 0) - entry.xp);
   state.global.totalXp = Math.max(0, (state.global.totalXp || 0) - entry.xp);
-  
+
   if (isInCurrentWeek(entry.createdAt)) {
     w.stats.weekXp = Math.max(0, (w.stats.weekXp || 0) - entry.xp);
     state.global.weekXp = Math.max(0, (state.global.weekXp || 0) - entry.xp);
