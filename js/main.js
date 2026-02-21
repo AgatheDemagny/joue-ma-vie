@@ -340,7 +340,7 @@ function showPopup(text) {
   clearTimeout(showPopup._t);
   showPopup._t = setTimeout(() => {
     popupEl.style.display = "none";
-  }, 4600);
+  }, 2600);
 }
 
 function clamp01(x){ return Math.max(0, Math.min(1, x)); }
@@ -1014,6 +1014,31 @@ function isMilestoneAllDone(obj){
 
 function getMilestoneNextStep(obj){
   return (obj.steps || []).find(s => !s.done) || null;
+}
+
+function autoCompleteMilestonesFromProgress(obj){
+  obj.progress = Number(obj.progress || 0);
+  obj.progressEvents = Array.isArray(obj.progressEvents) ? obj.progressEvents : [];
+
+  const steps = Array.isArray(obj.steps) ? obj.steps : [];
+  let extraXp = 0;
+
+  steps.forEach(step => {
+    if (step.done) return;
+
+    const c = Number(step.count || 0);
+    if (c > 0 && obj.progress >= c) {
+      step.done = true;
+
+      // date cohérente : moment où la progression a atteint ce palier
+      const ts = obj.progressEvents[c - 1]?.ts || Date.now();
+      step.doneAt = ts;
+
+      extraXp += Number(step.xp || 0);
+    }
+  });
+
+  return extraXp;
 }
 
 // 2 sections : En cours / Archivés
@@ -1973,8 +1998,18 @@ if (editSaveMilestoneBtn) editSaveMilestoneBtn.onclick = async () => {
 
   obj.steps = [...doneSteps, ...newNonDone].sort((a,b) => a.count - b.count);
 
+  // ✅ Recalcule les paliers qui devraient déjà être atteints
+  const extraXp = autoCompleteMilestonesFromProgress(obj);
+
   save();
-  showPopup("📝 Objectif palier modifié");
+
+  // ✅ Donne les XP manquants en une seule fois (si besoin)
+  if (extraXp > 0) {
+    addXpObjectiveOnly(w.id, extraXp, "🏅 Paliers recalculés !");
+  } else {
+    showPopup("📝 Objectif palier modifié");
+  }
+
   closeEditObjectiveModal();
   renderObjectives();
 };
